@@ -15,9 +15,9 @@
                  TextTrimming="CharacterEllipsis" />
     </StackPanel>
     <StackPanel Spacing="2">
-      <ToggleSwitch Content="Move the files there" IsChecked="{Binding MoveFiles}" />
+      <ToggleSwitch Content="Move files" IsChecked="{Binding MoveFiles}" />
       <TextBlock Classes="caption secondary" TextWrapping="Wrap" Margin="48,0,0,0"
-                 Text="Leave this off when the files are already in that folder (moved by hand): the server then only looks for them there." />
+                 Text="Leave off when the files are already in the destination folder (moved by hand)" />
     </StackPanel>
     <StackPanel Classes="actions">
       <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />

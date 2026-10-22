@@ -55,7 +55,7 @@
             <DockPanel HorizontalSpacing="12" Margin="0,8,0,0" IsVisible="{Binding FileInUse}">
               <Button DockPanel.Dock="Right" Theme="{StaticResource MaterialFlatButton}" Content="Change…"
                       Command="{Binding ChangeMasterPasswordCommand}" IsVisible="{Binding UseMasterPassword}" />
-              <ToggleSwitch Content="Protect the file with a master password" IsChecked="{Binding UseMasterPassword}"
+              <ToggleSwitch Content="Protect the password file with a master password" IsChecked="{Binding UseMasterPassword}"
                             IsEnabled="{Binding !IsBusy}" />
             </DockPanel>
             <TextBlock Classes="error" Text="{Binding Error}" TextWrapping="Wrap" FontSize="12"
@@ -98,7 +98,7 @@
                   </DataTemplate>
                 </ListBox.ItemTemplate>
               </ListBox>
-              <TextBlock Classes="secondary" Text="No servers yet. Add the Transmission server you want to control."
+              <TextBlock Classes="secondary" Text="No servers configured. Add a Transmission server."
                          TextWrapping="Wrap" TextAlignment="Center" Margin="24"
                          HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasServers}" />
             </Panel>
@@ -128,13 +128,13 @@
 
               <TextBlock Classes="section" Text="QUEUE" Margin="0,8,0,0" />
               <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
-                <ToggleSwitch Content="Download at most this many at once" IsChecked="{Binding DownloadQueueEnabled}" VerticalAlignment="Center" />
-                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Torrents"
+                <ToggleSwitch Content="Limit maximum simultaneous downloads" IsChecked="{Binding DownloadQueueEnabled}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Downloads"
                          Text="{Binding DownloadQueueSize}" IsEnabled="{Binding DownloadQueueEnabled}" />
               </Grid>
               <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
-                <ToggleSwitch Content="Seed at most this many at once" IsChecked="{Binding SeedQueueEnabled}" VerticalAlignment="Center" />
-                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Torrents"
+                <ToggleSwitch Content="Limit maximum simultaneous seeds" IsChecked="{Binding SeedQueueEnabled}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Seeds"
                          Text="{Binding SeedQueueSize}" IsEnabled="{Binding SeedQueueEnabled}" />
               </Grid>
 
