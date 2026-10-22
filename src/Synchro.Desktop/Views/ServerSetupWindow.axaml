@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterOwner">
 
   <StackPanel Margin="24" Spacing="16">
-    <TextBlock Text="Enter the details of your Transmission server." TextWrapping="Wrap" />
+    <TextBlock Text="Transmission server settings" TextWrapping="Wrap" />
 
     <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
       <TextBox Classes="outline" assists:TextFieldAssist.Label="Address"

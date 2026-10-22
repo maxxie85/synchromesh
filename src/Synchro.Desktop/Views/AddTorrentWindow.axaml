@@ -35,7 +35,7 @@
       <ProgressBar IsIndeterminate="True" />
       <TextBlock Classes="secondary" Text="{Binding FetchText}" TextWrapping="Wrap" />
       <TextBlock Classes="caption secondary" TextWrapping="Wrap"
-                 Text="The torrent is on the server, getting its file list. It is stopped while you choose; Cancel removes it again." />
+                 Text="The torrent is on the server, retrieving the file list. It is stopped while you choose; Cancel removes it again." />
     </StackPanel>
 
     <Grid IsVisible="{Binding HasFile}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
@@ -73,9 +73,9 @@
       <ToggleSwitch Content="Choose files before downloading" IsChecked="{Binding ChooseFilesFirst}"
                 IsVisible="{Binding ShowsChooseFilesFirst}"
                 ToolTip.Tip="Adds the link paused, waits for its file list, and lets you pick what to download." />
-      <ToggleSwitch Content="Don't start downloading yet" IsChecked="{Binding StartPaused}"
+      <ToggleSwitch Content="Add torrent as paused" IsChecked="{Binding StartPaused}"
                 IsVisible="{Binding !IsFetchingFiles}" />
-      <ToggleSwitch Content="Download in order, to play while it downloads" IsChecked="{Binding SequentialDownload}"
+      <ToggleSwitch Content="Download order" IsChecked="{Binding SequentialDownload}"
                 IsVisible="{Binding IsInput}"
                 ToolTip.Tip="Fetches pieces from the start instead of rarest first. You can change this later in the Options tab." />
     </StackPanel>
