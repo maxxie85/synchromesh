@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        x:Class="Synchro.Desktop.Views.TextPromptWindow"
+        x:DataType="vm:TextPromptViewModel"
+        Title="{Binding Title}"
+        Width="520" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="16">
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    <StackPanel Spacing="4">
+      <TextBox x:Name="Input" Classes="outline" assists:TextFieldAssist.Label="{Binding Label}" Text="{Binding Text}"
+               AcceptsReturn="{Binding Multiline}" TextWrapping="NoWrap" PasswordChar="{Binding PasswordChar}"
+               Classes.multiline="{Binding Multiline}" />
+      <TextBlock Classes="caption error" Text="{Binding Error}" IsVisible="{Binding HasError}" TextWrapping="Wrap" Margin="4,0" />
+    </StackPanel>
+    <StackPanel Classes="actions">
+      <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+      <Button Content="{Binding ConfirmText}" Command="{Binding ConfirmCommand}" IsDefault="{Binding !Multiline}" />
+    </StackPanel>
+  </StackPanel>
+  <Window.Styles>
+    <Style Selector="TextBox.multiline">
+      <Setter Property="Height" Value="150" />
+    </Style>
+    <!-- Material centres the text; several lines read better from the top. -->
+    <Style Selector="TextBox.multiline /template/ Panel#PART_TextContainer">
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="Margin" Value="12,20,12,8" />
+    </Style>
+  </Window.Styles>
+</Window>

@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        x:Class="Synchro.Desktop.Views.ConfirmRemoveWindow"
+        x:DataType="vm:ConfirmRemoveViewModel"
+        Title="Remove torrents"
+        Width="440" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="14">
+    <TextBlock Classes="subtitle1" Text="{Binding Message}" TextWrapping="Wrap" />
+    <TextBlock Classes="secondary" Text="{Binding Detail}" TextWrapping="Wrap" />
+    <ToggleSwitch Content="Also delete the downloaded files" IsChecked="{Binding DeleteLocalData}" />
+    <StackPanel Classes="actions">
+      <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+      <Button Content="Remove" Command="{Binding ConfirmCommand}" />
+    </StackPanel>
+  </StackPanel>
+</Window>

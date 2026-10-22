@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Synchro.Desktop.Views.LicensesWindow"
+        Title="License texts"
+        Width="720" Height="560" MinWidth="480" MinHeight="320"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom" Classes="actions" Margin="0,16,0,0">
+      <Button Content="Close" IsDefault="True" IsCancel="True" Click="OnCloseClick" />
+    </StackPanel>
+    <!-- Read-only and selectable, so a license can be copied. -->
+    <TextBox x:Name="NoticesText" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+             FontFamily="{OnPlatform 'Consolas', macOS='Menlo'}" FontSize="12"
+             VerticalContentAlignment="Top" />
+  </DockPanel>
+</Window>

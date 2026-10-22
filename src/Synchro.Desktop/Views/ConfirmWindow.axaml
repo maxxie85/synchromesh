@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Synchro.Desktop.Views.ConfirmWindow"
+        Width="440" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="14">
+    <TextBlock x:Name="TitleText" Classes="subtitle1" TextWrapping="Wrap" />
+    <TextBlock x:Name="MessageText" Classes="secondary" TextWrapping="Wrap" />
+    <StackPanel Classes="actions">
+      <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" IsCancel="True" Click="OnCancelClick" />
+      <Button x:Name="ConfirmButton" IsDefault="True" Click="OnConfirmClick" />
+    </StackPanel>
+  </StackPanel>
+</Window>

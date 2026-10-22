@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        x:Class="Synchro.Desktop.Views.SpeedLimitsWindow"
+        x:DataType="vm:SpeedLimitsViewModel"
+        Title="Speed limits"
+        Width="460" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="16">
+    <TextBlock Classes="secondary" Text="These limits apply to the whole server, not just this app." TextWrapping="Wrap" />
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+    <TextBlock Classes="error" Text="{Binding LoadError}" IsVisible="{Binding HasLoadError}" TextWrapping="Wrap" />
+
+    <!-- Faded until the server's limits are in, so the placeholder values don't look real. -->
+    <StackPanel Classes="form" Spacing="16" IsEnabled="{Binding IsReady}">
+    <Grid ColumnDefinitions="*,150" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="16">
+      <ToggleSwitch Content="Limit download speed" IsChecked="{Binding DownloadLimited}" VerticalAlignment="Center" />
+      <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="kB/s" Text="{Binding DownloadLimit}" IsEnabled="{Binding DownloadLimited}" />
+
+      <ToggleSwitch Grid.Row="1" Content="Limit upload speed" IsChecked="{Binding UploadLimited}" VerticalAlignment="Center" />
+      <TextBox Grid.Row="1" Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="kB/s" Text="{Binding UploadLimit}" IsEnabled="{Binding UploadLimited}" />
+    </Grid>
+
+    <ToggleSwitch Content="Use the server's alternative speed limits" IsChecked="{Binding AlternativeSpeedsEnabled}" />
+    </StackPanel>
+
+    <StackPanel Classes="actions">
+      <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+      <Button Content="Save" Command="{Binding SaveCommand}" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+  <Window.Styles>
+    <Style Selector="StackPanel.form:disabled">
+      <Setter Property="Opacity" Value="0.35" />
+    </Style>
+  </Window.Styles>
+</Window>

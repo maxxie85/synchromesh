@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="clr-namespace:Synchro.ViewModels.Details;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="Synchro.Desktop.Views.FileTreeView"
+             x:DataType="d:FilesViewModel">
+
+  <!-- A torrent's files with wanted checkbox and priority. Used by the Files tab and the Add dialog;
+       Done and Progress are hidden before adding (ShowsProgress). Auto columns with fixed-width cells keep the
+       header and rows aligned whether or not those columns show. -->
+  <UserControl.Styles>
+    <Style Selector="ItemsControl.files > ContentPresenter">
+      <Setter Property="Padding" Value="16,1" />
+    </Style>
+    <Style Selector="ToggleButton.expander">
+      <Setter Property="Theme" Value="{StaticResource MaterialIconButton}" />
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Padding" Value="2" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyBrush}" />
+    </Style>
+    <Style Selector="CheckBox.wanted">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.priority">
+      <Setter Property="Theme" Value="{StaticResource MaterialFlatButton}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyBrush}" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+  </UserControl.Styles>
+
+  <DockPanel>
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="12" Margin="16,10,16,6">
+      <TextBlock Classes="header" Text="Name" Margin="28,0,0,0" />
+      <TextBlock Grid.Column="1" Width="80" Classes="header number" Text="Size" />
+      <TextBlock Grid.Column="2" Width="80" Classes="header number" Text="Done" IsVisible="{Binding ShowsProgress}" />
+      <TextBlock Grid.Column="3" Width="140" Classes="header" Text="Progress" IsVisible="{Binding ShowsProgress}" />
+      <TextBlock Grid.Column="4" Width="110" Classes="header" Text="Priority" />
+    </Grid>
+    <ScrollViewer>
+      <ItemsControl Classes="files" ItemsSource="{Binding Rows}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <VirtualizingStackPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="d:FileNodeViewModel">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="12" Background="Transparent">
+              <Grid.ContextMenu>
+                <ContextMenu Opening="OnRowMenuOpening">
+                  <MenuItem Header="Rename…" Command="{Binding RenameCommand}" />
+                </ContextMenu>
+              </Grid.ContextMenu>
+              <!-- A DockPanel, not a horizontal StackPanel: the name (last child) gets the width that is left, so a
+                   long name is cut off with "…" instead of running into the Size column. -->
+              <DockPanel HorizontalSpacing="4">
+                <Border Width="{Binding Indent}" />
+                <ToggleButton Classes="expander" IsVisible="{Binding IsFolder}" IsChecked="{Binding IsExpanded}"
+                              ToolTip.Tip="Show or hide the folder's contents">
+                  <Panel>
+                    <icons:MaterialIcon Kind="ChevronRight" IsVisible="{Binding !IsExpanded}" />
+                    <icons:MaterialIcon Kind="ChevronDown" IsVisible="{Binding IsExpanded}" />
+                  </Panel>
+                </ToggleButton>
+                <Border Width="24" IsVisible="{Binding !IsFolder}" />
+                <CheckBox Classes="wanted" IsChecked="{Binding IsWanted}" ToolTip.Tip="Download this" />
+                <icons:MaterialIcon Kind="FolderOutline" Width="18" Height="18" Opacity="0.7" IsVisible="{Binding IsFolder}" />
+                <icons:MaterialIcon Kind="FileOutline" Width="18" Height="18" Opacity="0.7" IsVisible="{Binding !IsFolder}" />
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                           ToolTip.Tip="{Binding Path}" Margin="4,0,0,0" />
+              </DockPanel>
+              <TextBlock Grid.Column="1" Width="80" Classes="number" Text="{Binding SizeText}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2" Width="80" Classes="number" Text="{Binding DoneText}" VerticalAlignment="Center"
+                         IsVisible="{Binding ShowsProgress}" />
+              <Grid Grid.Column="3" Width="140" ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center"
+                    IsVisible="{Binding ShowsProgress}">
+                <ProgressBar Classes="status downloading" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                             VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
+                           MinWidth="34" TextAlignment="Right" />
+              </Grid>
+              <Button Grid.Column="4" Width="110" Classes="priority" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                  <TextBlock Text="{Binding PriorityText}" VerticalAlignment="Center" />
+                  <icons:MaterialIcon Kind="MenuDown" Width="18" Height="18" />
+                </StackPanel>
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuItem Header="High" Command="{Binding SetPriorityCommand}"
+                              CommandParameter="{x:Static d:PriorityOption.High}" />
+                    <MenuItem Header="Normal" Command="{Binding SetPriorityCommand}"
+                              CommandParameter="{x:Static d:PriorityOption.Normal}" />
+                    <MenuItem Header="Low" Command="{Binding SetPriorityCommand}"
+                              CommandParameter="{x:Static d:PriorityOption.Low}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

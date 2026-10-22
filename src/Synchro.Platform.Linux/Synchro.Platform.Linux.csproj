@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Synchro.Core\Synchro.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Synchro.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Desktop notifications over D-Bus. Avalonia's Linux backend already ships this library (same version). -->
+    <PackageReference Include="Tmds.DBus.Protocol" />
+  </ItemGroup>
+</Project>

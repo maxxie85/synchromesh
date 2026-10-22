@@ -1,0 +1,66 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        x:Class="Synchro.Desktop.Views.ServerSetupWindow"
+        x:DataType="vm:ServerSetupViewModel"
+        Title="Connect to Transmission"
+        Width="480" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="24" Spacing="16">
+    <TextBlock Text="Enter the details of your Transmission server." TextWrapping="Wrap" />
+
+    <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+      <TextBox Classes="outline" assists:TextFieldAssist.Label="Address"
+               Text="{Binding Host}" PlaceholderText="192.168.1.20 or nas.local" />
+      <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Port" Text="{Binding Port}" />
+    </Grid>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+      <TextBox Classes="outline" assists:TextFieldAssist.Label="Username"
+               Text="{Binding Username}" PlaceholderText="Optional" />
+      <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Password"
+               Text="{Binding Password}" PasswordChar="•" PlaceholderText="Optional" />
+    </Grid>
+
+    <Expander Header="Advanced options">
+      <StackPanel Spacing="16" Margin="0,8,0,0">
+        <TextBox Classes="outline" assists:TextFieldAssist.Label="Name"
+                 Text="{Binding Name}" PlaceholderText="Defaults to the address" />
+        <TextBox Classes="outline" assists:TextFieldAssist.Label="RPC path" Text="{Binding RpcPath}" />
+        <ToggleSwitch Content="Use HTTPS" IsChecked="{Binding UseHttps}" />
+        <StackPanel Spacing="12" IsVisible="{Binding UseHttps}">
+          <TextBlock Classes="caption secondary" TextWrapping="Wrap"
+                     Text="Only when a proxy in front of Transmission asks for a client certificate. Use PEM files, or one .p12/.pfx file without a password." />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <TextBox Classes="outline" assists:TextFieldAssist.Label="Client certificate"
+                     Text="{Binding ClientCertificatePath}" PlaceholderText="Optional" />
+            <Button Grid.Column="1" Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+                    Content="Choose…" Command="{Binding BrowseCertificateCommand}" VerticalAlignment="Center" />
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <TextBox Classes="outline" assists:TextFieldAssist.Label="Private key"
+                     Text="{Binding ClientKeyPath}" PlaceholderText="Optional when it's in the certificate file" />
+            <Button Grid.Column="1" Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+                    Content="Choose…" Command="{Binding BrowseKeyCommand}" VerticalAlignment="Center" />
+          </Grid>
+        </StackPanel>
+      </StackPanel>
+    </Expander>
+
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsTesting}" />
+    <TextBlock Text="{Binding StatusMessage}" IsVisible="{Binding HasStatus}" TextWrapping="Wrap"
+               Classes.error="{Binding IsStatusError}" />
+    <Button Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+            Content="Keep it in an encrypted file" Command="{Binding SaveWithPasswordFileCommand}"
+            IsVisible="{Binding CanUsePasswordFile}" HorizontalAlignment="Left" />
+
+    <Grid ColumnDefinitions="Auto,*,Auto">
+      <Button Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}" Content="Test connection" Command="{Binding TestCommand}" />
+      <StackPanel Grid.Column="2" Classes="actions" Margin="0">
+        <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+        <Button Content="Save" Command="{Binding SaveCommand}" IsDefault="True" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</Window>

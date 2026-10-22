@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Renders the README screenshots from the real windows against a made-up server. See Program.cs. Not shipped. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Synchro.Desktop\Synchro.Desktop.csproj" />
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="NSubstitute" />
+  </ItemGroup>
+</Project>

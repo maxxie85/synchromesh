@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="Synchro.Tests" />
+    <InternalsVisibleTo Include="Synchro.Screenshots" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Synchro.Core\Synchro.Core.csproj" />
+    <ProjectReference Include="..\Synchro.AppServices\Synchro.AppServices.csproj" />
+  </ItemGroup>
+</Project>

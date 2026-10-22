@@ -1,0 +1,266 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="clr-namespace:Synchro.ViewModels.Details;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:conv="clr-namespace:Synchro.Desktop.Converters"
+             xmlns:views="clr-namespace:Synchro.Desktop.Views"
+             xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+             x:Class="Synchro.Desktop.Views.TorrentDetailsView"
+             x:DataType="d:TorrentDetailsViewModel">
+
+  <UserControl.Styles>
+    <!-- Rows in the tab lists: same rhythm as the torrent list, without selection. -->
+    <Style Selector="ItemsControl.rows > ContentPresenter">
+      <Setter Property="Padding" Value="16,5" />
+    </Style>
+    <Style Selector="SelectableTextBlock.value">
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="SelectableTextBlock.value.wrap">
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyLightBrush}" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyLightBrush}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+  </UserControl.Styles>
+
+  <Panel>
+    <!-- The tabs stay visible without a selection; their content waits for details and the message below says why. -->
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+
+      <!-- General -->
+      <TabItem Header="General">
+        <ScrollViewer IsVisible="{Binding HasDetails}">
+          <StackPanel Margin="16,12,16,16" Spacing="12">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+              <ProgressBar Classes="status" Minimum="0" Maximum="100" Value="{Binding General.Progress}"
+                           Classes.downloading="{Binding General.Status, Converter={x:Static conv:StatusConverters.IsDownloading}}"
+                           Classes.seeding="{Binding General.Status, Converter={x:Static conv:StatusConverters.IsSeeding}}"
+                           Classes.error="{Binding General.HasError}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding General.ProgressText}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+              <StackPanel>
+                <TextBlock Classes="section" Text="TRANSFER" />
+                <ItemsControl ItemsSource="{Binding General.TransferRows}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="d:DetailRow">
+                      <Grid ColumnDefinitions="120,*" ColumnSpacing="12" Margin="0,3" IsVisible="{Binding IsVisible}">
+                        <TextBlock Classes="label" Text="{Binding Label}" />
+                        <SelectableTextBlock Grid.Column="1" Classes="value" Classes.wrap="{Binding Wraps}"
+                                             Text="{Binding Value}" ToolTip.Tip="{Binding Value}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="section" Text="TORRENT" />
+                <ItemsControl ItemsSource="{Binding General.TorrentRows}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="d:DetailRow">
+                      <Grid ColumnDefinitions="120,*" ColumnSpacing="12" Margin="0,3" IsVisible="{Binding IsVisible}">
+                        <TextBlock Classes="label" Text="{Binding Label}" />
+                        <SelectableTextBlock Grid.Column="1" Classes="value" Classes.wrap="{Binding Wraps}"
+                                             Text="{Binding Value}" ToolTip.Tip="{Binding Value}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Trackers -->
+      <TabItem Header="{Binding TrackersHeader}">
+        <DockPanel IsVisible="{Binding HasDetails}">
+          <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="12,4,12,8">
+            <Button Theme="{StaticResource MaterialFlatButton}" Command="{Binding AddTrackersCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <icons:MaterialIcon Kind="Plus" />
+                <TextBlock Text="Add trackers…" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="36,*,220,90,70,70,80,32" ColumnSpacing="12" Margin="16,10,16,6">
+            <TextBlock Classes="header number" Text="Tier" />
+            <TextBlock Grid.Column="1" Classes="header" Text="Address" />
+            <TextBlock Grid.Column="2" Classes="header" Text="Status" />
+            <TextBlock Grid.Column="3" Classes="header number" Text="Next update" />
+            <TextBlock Grid.Column="4" Classes="header number" Text="Seeders" />
+            <TextBlock Grid.Column="5" Classes="header number" Text="Leechers" />
+            <TextBlock Grid.Column="6" Classes="header number" Text="Downloads" />
+          </Grid>
+          <ScrollViewer>
+            <ItemsControl Classes="rows" ItemsSource="{Binding Trackers}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="d:TrackerItemViewModel">
+                  <Grid ColumnDefinitions="36,*,220,90,70,70,80,32" ColumnSpacing="12">
+                    <TextBlock Classes="number secondary" Text="{Binding TierText}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Address}" TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding Address}" />
+                    <DockPanel Grid.Column="2" HorizontalSpacing="6">
+                      <icons:MaterialIcon Classes="status seeding" Kind="CheckCircleOutline" IsVisible="{Binding IsWorking}" />
+                      <icons:MaterialIcon Classes="status error" Kind="AlertCircleOutline" IsVisible="{Binding HasError}" />
+                      <TextBlock Text="{Binding StatusText}" TextTrimming="CharacterEllipsis"
+                                 ToolTip.Tip="{Binding StatusText}" Classes.error="{Binding HasError}" />
+                    </DockPanel>
+                    <TextBlock Grid.Column="3" Classes="number" Text="{Binding NextUpdateText}" />
+                    <TextBlock Grid.Column="4" Classes="number" Text="{Binding SeedersText}" />
+                    <TextBlock Grid.Column="5" Classes="number" Text="{Binding LeechersText}" />
+                    <TextBlock Grid.Column="6" Classes="number" Text="{Binding DownloadsText}" />
+                    <Button Grid.Column="7" Classes="bar small" ToolTip.Tip="Remove this tracker"
+                            Command="{Binding $parent[UserControl].((d:TorrentDetailsViewModel)DataContext).RemoveTrackerCommand}"
+                            CommandParameter="{Binding}">
+                      <icons:MaterialIcon Kind="Close" />
+                    </Button>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
+      <!-- Peers -->
+      <TabItem Header="{Binding PeersHeader}">
+        <Panel IsVisible="{Binding HasDetails}">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="20,150,*,80,140,90,90" ColumnSpacing="12" Margin="16,10,16,6">
+              <TextBlock Grid.Column="1" Classes="header" Text="Address" />
+              <TextBlock Grid.Column="2" Classes="header" Text="Client" />
+              <TextBlock Grid.Column="3" Classes="header" Text="Flags" />
+              <TextBlock Grid.Column="4" Classes="header" Text="Has" />
+              <TextBlock Grid.Column="5" Classes="header number" Text="Down" />
+              <TextBlock Grid.Column="6" Classes="header number" Text="Up" />
+            </Grid>
+            <ScrollViewer>
+              <ItemsControl Classes="rows" ItemsSource="{Binding Peers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <Grid ColumnDefinitions="20,150,*,80,140,90,90" ColumnSpacing="12">
+                      <icons:MaterialIcon Kind="LockOutline" Width="14" Height="14" Opacity="0.6"
+                                          IsVisible="{Binding IsEncrypted}" ToolTip.Tip="Encrypted connection" />
+                      <TextBlock Grid.Column="1" Text="{Binding Address}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="2" Text="{Binding Client}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="3" Classes="secondary" Text="{Binding Flags}" FontFamily="Menlo, monospace" FontSize="12"
+                                 VerticalAlignment="Center" />
+                      <Grid Grid.Column="4" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <ProgressBar Classes="status downloading" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                                     VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
+                                   MinWidth="34" TextAlignment="Right" VerticalAlignment="Center" />
+                      </Grid>
+                      <TextBlock Grid.Column="5" Classes="number" Text="{Binding DownloadText}" />
+                      <TextBlock Grid.Column="6" Classes="number" Text="{Binding UploadText}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </DockPanel>
+          <TextBlock Classes="secondary" Text="No peers connected." HorizontalAlignment="Center" VerticalAlignment="Center"
+                     IsVisible="{Binding !Peers.Count}" />
+        </Panel>
+      </TabItem>
+      <!-- Files -->
+      <TabItem Header="{Binding FilesHeader}">
+        <Panel IsVisible="{Binding HasDetails}">
+          <views:FileTreeView DataContext="{Binding Files}" IsVisible="{Binding HasFiles}" />
+          <TextBlock Classes="secondary" Text="Loading files…" HorizontalAlignment="Center" VerticalAlignment="Center"
+                     IsVisible="{Binding !Files.HasFiles}" />
+        </Panel>
+      </TabItem>
+      <!-- Options: this torrent's own limits. Edits apply with the Apply button, not on every keystroke. -->
+      <TabItem Header="Options">
+        <ScrollViewer IsVisible="{Binding HasDetails}">
+          <Grid DataContext="{Binding Options}" x:DataType="d:TorrentOptionsViewModel" Margin="16,12,16,16"
+                ColumnDefinitions="*,*" ColumnSpacing="32" RowDefinitions="*,Auto">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="section" Text="SPEED" />
+              <Grid ColumnDefinitions="*,140" ColumnSpacing="12">
+                <ToggleSwitch Content="Limit download speed" IsChecked="{Binding DownloadLimited}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="kB/s"
+                         Text="{Binding DownloadLimit}" IsEnabled="{Binding DownloadLimited}" />
+              </Grid>
+              <Grid ColumnDefinitions="*,140" ColumnSpacing="12">
+                <ToggleSwitch Content="Limit upload speed" IsChecked="{Binding UploadLimited}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="kB/s"
+                         Text="{Binding UploadLimit}" IsEnabled="{Binding UploadLimited}" />
+              </Grid>
+              <ToggleSwitch Content="Also follow the server's overall speed limits" IsChecked="{Binding HonorsSessionLimits}" />
+              <Grid ColumnDefinitions="*,140" ColumnSpacing="12">
+                <TextBlock Text="Priority" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Priorities}" SelectedItem="{Binding Priority}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="d:LabeledChoice">
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </Grid>
+              <Grid ColumnDefinitions="*,140" ColumnSpacing="12">
+                <TextBlock Text="Maximum peers" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Peers" Text="{Binding PeerLimit}" />
+              </Grid>
+              <ToggleSwitch Content="Download in order, to play while it downloads" IsChecked="{Binding SequentialDownload}"
+                        ToolTip.Tip="Fetches pieces from the start instead of rarest first. Can make the whole download slower." />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Spacing="10">
+              <TextBlock Classes="section" Text="SEEDING" />
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ComboBox ItemsSource="{Binding RatioModes}" SelectedItem="{Binding RatioMode}" HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="d:LabeledChoice">
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Ratio"
+                         Text="{Binding RatioLimit}" IsVisible="{Binding HasCustomRatio}" />
+              </Grid>
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ComboBox ItemsSource="{Binding IdleModes}" SelectedItem="{Binding IdleMode}" HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="d:LabeledChoice">
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Minutes"
+                         Text="{Binding IdleLimitMinutes}" IsVisible="{Binding HasCustomIdle}" />
+              </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Classes="actions">
+              <Button Theme="{StaticResource MaterialFlatButton}" Content="Revert" Command="{Binding RevertCommand}" />
+              <Button Content="Apply" Command="{Binding ApplyCommand}" />
+            </StackPanel>
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+
+    <!-- Below the tab strip. -->
+    <Panel Margin="0,48,0,0" IsHitTestVisible="False">
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" VerticalAlignment="Top" />
+      <TextBlock Classes="secondary" Text="{Binding Message}" IsVisible="{Binding HasMessage}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Panel>
+  </Panel>
+</UserControl>

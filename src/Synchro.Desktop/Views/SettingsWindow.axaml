@@ -1,0 +1,237 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="clr-namespace:Synchro.ViewModels.Settings;assembly=Synchro.ViewModels"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:d="clr-namespace:Synchro.ViewModels.Details;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        x:Class="Synchro.Desktop.Views.SettingsWindow"
+        x:DataType="s:SettingsViewModel"
+        Title="Settings"
+        Width="640" Height="600" MinWidth="560" MinHeight="420"
+        WindowStartupLocation="CenterOwner">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.section">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyLightBrush}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="ListBox.settings ListBoxItem">
+      <Setter Property="Padding" Value="16,10" />
+    </Style>
+    <Style Selector="ListBox.settings ListBoxItem:selected /template/ Border#PART_HoverEffect">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryMidBrush}" />
+      <Setter Property="Opacity" Value="0.14" />
+    </Style>
+    <Style Selector="Border.chip">
+      <Setter Property="Background" Value="{DynamicResource StatusIdleBrush}" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.chip.connected"><Setter Property="Background" Value="{DynamicResource StatusSeedingBrush}" /></Style>
+    <Style Selector="Border.chip.connecting"><Setter Property="Background" Value="{DynamicResource ConnectingBrush}" /></Style>
+    <Style Selector="Border.chip.failed"><Setter Property="Background" Value="{DynamicResource MaterialValidationErrorBrush}" /></Style>
+  </Window.Styles>
+
+  <DockPanel>
+    <!-- Changes apply right away, so there's nothing to save: one button closes the window. -->
+    <StackPanel DockPanel.Dock="Bottom" Classes="actions" Margin="24,8,24,20">
+      <Button Content="Done" IsDefault="True" IsCancel="True" Click="OnDoneClick" />
+    </StackPanel>
+
+    <TabControl SelectedIndex="{Binding SelectedSectionIndex}">
+
+      <!-- Servers -->
+      <TabItem Header="Servers">
+        <DockPanel DataContext="{Binding Servers}" x:DataType="s:ServersViewModel" Margin="24,16,24,0">
+          <!-- Where passwords are kept. Bound to the window's view model: this tab's context is the server list. -->
+          <StackPanel DockPanel.Dock="Bottom" Margin="0,20,0,0" Spacing="4"
+                      DataContext="{Binding $parent[Window].((s:SettingsViewModel)DataContext).Passwords}"
+                      x:DataType="s:PasswordsViewModel">
+            <ToggleSwitch Content="Keep passwords in Synchromesh's own encrypted file" IsChecked="{Binding UseFile}"
+                          IsEnabled="{Binding !IsBusy}" />
+            <TextBlock Classes="secondary" Text="{Binding Description}" TextWrapping="Wrap" FontSize="12" />
+            <DockPanel HorizontalSpacing="12" Margin="0,8,0,0" IsVisible="{Binding FileInUse}">
+              <Button DockPanel.Dock="Right" Theme="{StaticResource MaterialFlatButton}" Content="Change…"
+                      Command="{Binding ChangeMasterPasswordCommand}" IsVisible="{Binding UseMasterPassword}" />
+              <ToggleSwitch Content="Protect the file with a master password" IsChecked="{Binding UseMasterPassword}"
+                            IsEnabled="{Binding !IsBusy}" />
+            </DockPanel>
+            <TextBlock Classes="error" Text="{Binding Error}" TextWrapping="Wrap" FontSize="12"
+                       IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          </StackPanel>
+
+          <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
+            <Button Command="{Binding AddCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Plus" Width="18" Height="18" />
+                <TextBlock Text="Add server" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+              <Button Theme="{StaticResource MaterialFlatButton}" Content="Remove…" Command="{Binding RemoveCommand}" />
+              <Button Theme="{StaticResource MaterialFlatButton}" Content="Edit…" Command="{Binding EditCommand}" />
+              <Button Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+                      Content="Connect" Command="{Binding ConnectCommand}" />
+            </StackPanel>
+          </Grid>
+
+          <Border BorderThickness="1" CornerRadius="4" BorderBrush="{DynamicResource MaterialDividerBrush}">
+            <Panel>
+              <ListBox Classes="settings" ItemsSource="{Binding Servers}" SelectedItem="{Binding Selected}"
+                       DoubleTapped="OnServerDoubleTapped">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="s:ServerItemViewModel">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                      <icons:MaterialIcon Kind="ServerNetwork" Width="22" Height="22" Opacity="0.7" />
+                      <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Text="{Binding Name}" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="secondary" Text="{Binding Address}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <Border Grid.Column="2" Classes="chip" IsVisible="{Binding IsActive}"
+                              Classes.connected="{Binding IsConnected}" Classes.connecting="{Binding IsConnecting}"
+                              Classes.failed="{Binding IsFailed}" ToolTip.Tip="{Binding StateDetail}">
+                        <TextBlock Text="{Binding StateText}" FontSize="11" Foreground="White" FontWeight="Medium" />
+                      </Border>
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <TextBlock Classes="secondary" Text="No servers yet. Add the Transmission server you want to control."
+                         TextWrapping="Wrap" TextAlignment="Center" Margin="24"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasServers}" />
+            </Panel>
+          </Border>
+        </DockPanel>
+      </TabItem>
+
+      <!-- Transmission: the connected server's own preferences (session_set) -->
+      <TabItem Header="Transmission">
+        <DockPanel DataContext="{Binding Preferences}" x:DataType="s:ServerPreferencesViewModel" Margin="24,16,24,0">
+          <TextBlock DockPanel.Dock="Top" Classes="secondary" Text="{Binding Heading}" TextWrapping="Wrap" Margin="0,0,0,8" />
+          <StackPanel DockPanel.Dock="Bottom" Classes="actions" IsVisible="{Binding HasPreferences}">
+            <Button Theme="{StaticResource MaterialFlatButton}" Content="Revert" Command="{Binding RevertCommand}" />
+            <Button Content="Apply" Command="{Binding ApplyCommand}" />
+          </StackPanel>
+
+          <ScrollViewer IsVisible="{Binding HasPreferences}">
+            <StackPanel Spacing="10" Margin="0,4,12,12">
+              <TextBlock Classes="section" Text="DOWNLOADING" />
+              <TextBox Classes="outline" assists:TextFieldAssist.Label="Default download folder" Text="{Binding DownloadDirectory}" />
+              <ToggleSwitch Content="Keep unfinished downloads in another folder" IsChecked="{Binding IncompleteDirectoryEnabled}" />
+              <TextBox Classes="outline" assists:TextFieldAssist.Label="Folder for unfinished downloads"
+                       Text="{Binding IncompleteDirectory}" IsEnabled="{Binding IncompleteDirectoryEnabled}" />
+              <ToggleSwitch Content="Start torrents as soon as they're added" IsChecked="{Binding StartAddedTorrents}" />
+              <ToggleSwitch Content="Add .part to unfinished files" IsChecked="{Binding RenamePartialFiles}" />
+              <ToggleSwitch Content="Delete .torrent files after adding them" IsChecked="{Binding TrashOriginalTorrentFiles}" />
+
+              <TextBlock Classes="section" Text="QUEUE" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ToggleSwitch Content="Download at most this many at once" IsChecked="{Binding DownloadQueueEnabled}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Torrents"
+                         Text="{Binding DownloadQueueSize}" IsEnabled="{Binding DownloadQueueEnabled}" />
+              </Grid>
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ToggleSwitch Content="Seed at most this many at once" IsChecked="{Binding SeedQueueEnabled}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Torrents"
+                         Text="{Binding SeedQueueSize}" IsEnabled="{Binding SeedQueueEnabled}" />
+              </Grid>
+
+              <TextBlock Classes="section" Text="SEEDING" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ToggleSwitch Content="Stop seeding at ratio" IsChecked="{Binding SeedRatioLimited}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Ratio"
+                         Text="{Binding SeedRatioLimit}" IsEnabled="{Binding SeedRatioLimited}" />
+              </Grid>
+              <Grid ColumnDefinitions="*,120" ColumnSpacing="12">
+                <ToggleSwitch Content="Stop seeding when idle for" IsChecked="{Binding IdleSeedingLimitEnabled}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Minutes"
+                         Text="{Binding IdleSeedingLimitMinutes}" IsEnabled="{Binding IdleSeedingLimitEnabled}" />
+              </Grid>
+
+              <TextBlock Classes="section" Text="NETWORK" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <TextBox Classes="outline" assists:TextFieldAssist.Label="Peers in total" Text="{Binding PeerLimitGlobal}" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Peers per torrent" Text="{Binding PeerLimitPerTorrent}" />
+              </Grid>
+              <ComboBox ItemsSource="{Binding EncryptionModes}" SelectedItem="{Binding Encryption}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="d:LabeledChoice">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <ToggleSwitch Content="Find peers through DHT" IsChecked="{Binding DhtEnabled}" />
+              <ToggleSwitch Content="Exchange peers with other peers (PEX)" IsChecked="{Binding PexEnabled}" />
+              <ToggleSwitch Content="Find peers on the local network" IsChecked="{Binding LpdEnabled}" />
+              <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="12">
+                <TextBox Classes="outline" assists:TextFieldAssist.Label="Peer port" Text="{Binding PeerPort}" />
+                <ToggleSwitch Grid.Column="1" Content="Open the port on the router (UPnP / NAT-PMP)"
+                          IsChecked="{Binding PortForwardingEnabled}" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+                        Content="Check port" Command="{Binding TestPortCommand}" VerticalAlignment="Center" />
+              </Grid>
+              <TextBlock Classes="secondary" Text="{Binding PortTestText}" TextWrapping="Wrap" FontSize="12"
+                         IsVisible="{Binding PortTestText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+              <TextBlock Classes="section" Text="BLOCKLIST" Margin="0,8,0,0" />
+              <ToggleSwitch Content="Refuse peers on the blocklist" IsChecked="{Binding BlocklistEnabled}" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBox Classes="outline" assists:TextFieldAssist.Label="Blocklist address" Text="{Binding BlocklistUrl}"
+                         PlaceholderText="https://example.org/blocklist.gz" />
+                <Button Grid.Column="1" Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+                        Content="Update now" Command="{Binding UpdateBlocklistCommand}" VerticalAlignment="Center"
+                        ToolTip.Tip="The server downloads the list from the saved address. Apply a new address first." />
+              </Grid>
+              <TextBlock Classes="secondary" Text="{Binding BlocklistText}" TextWrapping="Wrap" FontSize="12"
+                         IsVisible="{Binding BlocklistText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+              <TextBlock Classes="section" Text="ALTERNATIVE SPEED LIMITS" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <TextBox Classes="outline" assists:TextFieldAssist.Label="Download (kB/s)" Text="{Binding AltSpeedDown}" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="Upload (kB/s)" Text="{Binding AltSpeedUp}" />
+              </Grid>
+              <ToggleSwitch Content="Turn them on automatically" IsChecked="{Binding AltSpeedTimeEnabled}" />
+              <Grid ColumnDefinitions="100,100,*" ColumnSpacing="12" IsEnabled="{Binding AltSpeedTimeEnabled}">
+                <TextBox Classes="outline" assists:TextFieldAssist.Label="From" Text="{Binding AltSpeedFrom}" />
+                <TextBox Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="To" Text="{Binding AltSpeedTo}" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding DayChoices}" SelectedItem="{Binding AltSpeedDays}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="d:LabeledChoice">
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </Grid>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
+      <!-- Appearance -->
+      <TabItem Header="Appearance">
+        <StackPanel DataContext="{Binding Appearance}" x:DataType="s:AppearanceViewModel" Margin="24,16,24,0" Spacing="8">
+          <TextBlock Classes="secondary" Text="Theme" FontWeight="Medium" />
+          <Border BorderThickness="1" CornerRadius="4" BorderBrush="{DynamicResource MaterialDividerBrush}">
+            <ListBox Classes="settings" ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="s:ThemeOption">
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <RadioButton IsChecked="{Binding $parent[ListBoxItem].IsSelected}" IsHitTestVisible="False"
+                                 VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Label}" FontWeight="Medium" />
+                      <TextBlock Classes="secondary" Text="{Binding Description}" FontSize="12" />
+                    </StackPanel>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        x:Class="Synchro.Desktop.Views.LabelsWindow"
+        x:DataType="vm:LabelsViewModel"
+        Title="Labels"
+        Width="420" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="14">
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+
+    <Border BorderThickness="1" CornerRadius="4" BorderBrush="{DynamicResource MaterialDividerBrush}" MaxHeight="260"
+            IsVisible="{Binding HasChoices}">
+      <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding Choices}" Margin="8,4">
+          <ItemsControl.ItemTemplate>
+            <!-- A label that started mixed can be set back to mixed: "leave it as it is on each torrent". -->
+            <DataTemplate x:DataType="vm:LabelChoiceViewModel">
+              <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" IsThreeState="{Binding StartedMixed}"
+                        Margin="4,2" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+      <TextBox Classes="outline" assists:TextFieldAssist.Label="New label" Text="{Binding NewLabel}" />
+      <Button Grid.Column="1" Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+              Content="Add" Command="{Binding AddLabelCommand}" VerticalAlignment="Center" />
+    </Grid>
+    <TextBlock Classes="error caption" Text="{Binding NewLabelError}" IsVisible="{Binding NewLabelError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+    <StackPanel Classes="actions">
+      <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+      <Button Content="Save" Command="{Binding SaveCommand}" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

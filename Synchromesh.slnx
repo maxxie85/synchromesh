@@ -1,0 +1,50 @@
+<Solution>
+  <Folder Name="/Solution Files/">
+    <File Path="README.md" />
+    <File Path="CHANGELOG.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="docs\development.md" />
+  </Folder>
+  <Folder Name="/Solution Files/build/" />
+  <Folder Name="/Solution Files/build/ci/">
+    <File Path="build\ci\changelog-notes.sh" />
+    <File Path="build\ci\github-release.sh" />
+    <File Path="build\ci\release-notes.sh" />
+    <File Path="build\ci\install-macos-packaging-tools.sh" />
+  </Folder>
+  <Folder Name="/Solution Files/build/icon/">
+    <File Path="build\icon\AppIcon.icns" />
+    <File Path="build\icon\AppIcon.svg" />
+    <File Path="build\icon\make-icns.sh" />
+    <File Path="build\icon\render-svg.swift" />
+  </Folder>
+  <Folder Name="/Solution Files/build/linux/">
+    <File Path="build\linux\nl.vinch.synchromesh.desktop" />
+    <File Path="build\linux\install.sh" />
+    <File Path="build\linux\package.sh" />
+  </Folder>
+  <Folder Name="/Solution Files/build/macos/">
+    <File Path="build\macos\Info.plist" />
+    <File Path="build\macos\make-app.sh" />
+    <File Path="build\macos\package.sh" />
+  </Folder>
+  <Folder Name="/Solution Files/Workflows/">
+    <File Path=".github\workflows\ci.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Synchro.Core/Synchro.Core.csproj" />
+    <Project Path="src/Synchro.Platform.Windows/Synchro.Platform.Windows.csproj" />
+    <Project Path="src/Synchro.Transmission/Synchro.Transmission.csproj" />
+    <Project Path="src/Synchro.AppServices/Synchro.AppServices.csproj" />
+    <Project Path="src/Synchro.ViewModels/Synchro.ViewModels.csproj" />
+    <Project Path="src/Synchro.Platform.MacOS/Synchro.Platform.MacOS.csproj" />
+    <Project Path="src/Synchro.Platform.Linux/Synchro.Platform.Linux.csproj" />
+    <Project Path="src/Synchro.Desktop/Synchro.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Synchro.Tests/Synchro.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Synchro.Screenshots/Synchro.Screenshots.csproj" />
+  </Folder>
+</Solution>

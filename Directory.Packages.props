@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- UI -->
+    <PackageVersion Include="Avalonia" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.4" />
+    <PackageVersion Include="Material.Avalonia" Version="3.21.0" />
+    <PackageVersion Include="Material.Icons.Avalonia" Version="3.0.2" />
+    <!-- MVVM + DI -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="SimpleInjector" Version="5.6.0" />
+    <!-- Linux: D-Bus for notifications. Keep it at the version Avalonia.FreeDesktop uses. -->
+    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.94.1" />
+    <!-- Tests -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
+    <!-- tools/Synchro.Screenshots only: renders the windows without a screen. Not shipped. -->
+    <PackageVersion Include="Avalonia.Headless" Version="12.1.4" />
+  </ItemGroup>
+</Project>

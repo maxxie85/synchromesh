@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Synchromesh
+GenericName=BitTorrent remote control
+Comment=Control a Transmission server: torrents, downloads and settings
+Exec=@EXEC@ %U
+Icon=@ICON@
+Terminal=false
+Categories=Network;FileTransfer;P2P;
+Keywords=torrent;bittorrent;transmission;magnet;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+StartupWMClass=nl.vinch.synchromesh
+SingleMainWindow=true

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Function pointers for Objective-C callbacks (MacNotifier). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Synchro.Core\Synchro.Core.csproj" />
+  </ItemGroup>
+</Project>

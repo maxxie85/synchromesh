@@ -1,0 +1,33 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             x:Class="Synchro.Desktop.App"
+             x:DataType="vm:MainWindowViewModel"
+             Name="Synchromesh"
+             RequestedThemeVariant="Default">
+
+  <!-- The macOS app menu. Avalonia's own additions are off (Program: no Services submenu), so Hide, Hide Others,
+       Show All and Quit are here. DataContext is the main window's view model, set in App.axaml.cs. -->
+  <NativeMenu.Menu>
+    <NativeMenu>
+      <NativeMenuItem Header="About Synchromesh" Command="{Binding Help.AboutCommand}" />
+      <NativeMenuItemSeparator />
+      <NativeMenuItem Header="Settings…" Gesture="{OnPlatform Ctrl+OemComma, macOS=Cmd+OemComma}" Command="{Binding OpenSettingsCommand}" />
+      <NativeMenuItemSeparator />
+      <NativeMenuItem Header="Hide Synchromesh" Gesture="Cmd+H" Click="OnHide" />
+      <NativeMenuItem Header="Hide Others" Gesture="Cmd+Alt+H" Click="OnHideOthers" />
+      <NativeMenuItem Header="Show All" Click="OnShowAll" />
+      <NativeMenuItemSeparator />
+      <NativeMenuItem Header="Quit Synchromesh" Gesture="Cmd+Q" Click="OnQuit" />
+    </NativeMenu>
+  </NativeMenu.Menu>
+
+  <Application.Styles>
+    <!-- BaseTheme="Inherit" follows the app's theme variant, which follows macOS light/dark mode. -->
+    <themes:MaterialTheme BaseTheme="Inherit" PrimaryColor="Indigo" SecondaryColor="Teal" />
+    <icons:MaterialIconStyles />
+    <StyleInclude Source="avares://Synchromesh/Styles/AppStyles.axaml" />
+  </Application.Styles>
+</Application>

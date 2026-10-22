@@ -1,0 +1,222 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+
+  <!-- Colours the Material palette doesn't name. Light and dark get their own shade so both stay readable. -->
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="StatusDownloadingBrush" Color="#3F51B5" />
+          <SolidColorBrush x:Key="StatusSeedingBrush" Color="#2E7D32" />
+          <SolidColorBrush x:Key="StatusIdleBrush" Color="#9E9E9E" />
+          <SolidColorBrush x:Key="ConnectedBrush" Color="#2E7D32" />
+          <SolidColorBrush x:Key="ConnectingBrush" Color="#F9A825" />
+          <SolidColorBrush x:Key="SidebarBrush" Color="#F3F4F9" />
+          <SolidColorBrush x:Key="IconAccentBrush" Color="#3F51B5" />
+          <SolidColorBrush x:Key="ProgressTrackBrush" Color="#1F000000" />
+          <SolidColorBrush x:Key="SwitchOffThumbBrush" Color="#FAFAFA" />
+          <SolidColorBrush x:Key="SwitchOffTrackBrush" Color="#61000000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="StatusDownloadingBrush" Color="#8C9EFF" />
+          <SolidColorBrush x:Key="StatusSeedingBrush" Color="#81C784" />
+          <SolidColorBrush x:Key="StatusIdleBrush" Color="#9E9E9E" />
+          <SolidColorBrush x:Key="ConnectedBrush" Color="#81C784" />
+          <SolidColorBrush x:Key="ConnectingBrush" Color="#FFD54F" />
+          <SolidColorBrush x:Key="SidebarBrush" Color="#2A2A2E" />
+          <SolidColorBrush x:Key="IconAccentBrush" Color="#9FA8DA" />
+          <SolidColorBrush x:Key="ProgressTrackBrush" Color="#2EFFFFFF" />
+          <SolidColorBrush x:Key="SwitchOffThumbBrush" Color="#BDBDBD" />
+          <SolidColorBrush x:Key="SwitchOffTrackBrush" Color="#4DFFFFFF" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- Text -->
+  <Style Selector="TextBlock.error">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialValidationErrorBrush}" />
+  </Style>
+  <Style Selector="TextBlock.secondary">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialBodyLightBrush}" />
+  </Style>
+
+  <!-- Dialogs: 24px padding and a right-aligned action row, as in Material dialogs. -->
+  <Style Selector="StackPanel.actions">
+    <Setter Property="Orientation" Value="Horizontal" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="Spacing" Value="8" />
+    <Setter Property="Margin" Value="0,8,0,0" />
+  </Style>
+  <!-- Labelled fields: the label sits inside the empty field; the placeholder only appears once it has focus. -->
+  <Style Selector="TextBox.outline">
+    <Setter Property="UseFloatingPlaceholder" Value="True" />
+  </Style>
+
+  <!-- Search field in the app bar: a filled pill. -->
+  <Style Selector="Border.search">
+    <Setter Property="Background" Value="{DynamicResource SidebarBrush}" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="4,0,8,0" />
+  </Style>
+
+  <!-- Switches (used instead of checkboxes, except where a box must show "some of them"): room between the switch and
+       its label, and Material's off colours (the theme paints an off thumb in the text colour, near-black). -->
+  <Style Selector="ToggleSwitch /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="12,0,0,0" />
+  </Style>
+  <Style Selector="ToggleSwitch:unchecked /template/ Border#Thumb">
+    <Setter Property="Background" Value="{DynamicResource SwitchOffThumbBrush}" />
+    <Setter Property="BoxShadow" Value="0 1 3 0 #40000000" />
+  </Style>
+  <Style Selector="ToggleSwitch:unchecked /template/ Ellipse#RippleThumb">
+    <Setter Property="Fill" Value="{DynamicResource SwitchOffTrackBrush}" />
+  </Style>
+  <Style Selector="ToggleSwitch:unchecked /template/ Border#PART_TrackSwitch">
+    <Setter Property="Background" Value="{DynamicResource SwitchOffTrackBrush}" />
+  </Style>
+
+  <!-- Icon buttons in a bar: icon size and spacing in one place. -->
+  <Style Selector="Button.bar">
+    <Setter Property="Theme" Value="{StaticResource MaterialIconButton}" />
+    <Setter Property="Foreground" Value="{DynamicResource IconAccentBrush}" />
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="8" />
+  </Style>
+  <Style Selector="ToggleButton.bar">
+    <Setter Property="Theme" Value="{StaticResource MaterialIconButton}" />
+    <Setter Property="Foreground" Value="{DynamicResource IconAccentBrush}" />
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="8" />
+  </Style>
+  <Style Selector="ToggleButton.turtle:checked">
+    <Setter Property="Foreground" Value="{DynamicResource StatusSeedingBrush}" />
+    <Setter Property="Background" Value="{DynamicResource ProgressTrackBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.bar icons|MaterialIcon">
+    <Setter Property="Width" Value="22" />
+    <Setter Property="Height" Value="22" />
+  </Style>
+  <Style Selector="Button.bar icons|MaterialIcon">
+    <Setter Property="Width" Value="22" />
+    <Setter Property="Height" Value="22" />
+  </Style>
+  <!-- Smaller icon buttons inside list rows. -->
+  <Style Selector="Button.bar.small">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="5" />
+  </Style>
+  <Style Selector="Button.bar.small icons|MaterialIcon">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="16" />
+  </Style>
+
+  <!-- Server menu: the button in the app bar, and the rows in its flyout. -->
+  <Style Selector="Button.server">
+    <Setter Property="Theme" Value="{StaticResource MaterialFlatButton}" />
+    <Setter Property="Foreground" Value="{DynamicResource IconAccentBrush}" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style Selector="Button.menu">
+    <Setter Property="Theme" Value="{StaticResource MaterialFlatButton}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialBodyBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Padding" Value="12,6" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
+  <!-- Navigation list (sidebar): rounded selection pill tinted with the primary colour. -->
+  <Style Selector="ListBox.nav">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem">
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="Margin" Value="8,1" />
+    <Setter Property="Padding" Value="16,9" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:selected /template/ Border#PART_HoverEffect">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryMidBrush}" />
+    <Setter Property="Opacity" Value="0.16" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:selected">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- Torrent list -->
+  <Style Selector="TextBlock.header">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialBodyLightBrush}" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+  <Style Selector="TextBlock.number">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+  </Style>
+  <Style Selector="ListBox.torrents ListBoxItem">
+    <Setter Property="Padding" Value="16,8" />
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="ListBox.torrents ListBoxItem:selected /template/ Border#PART_HoverEffect">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryMidBrush}" />
+    <Setter Property="Opacity" Value="0.14" />
+  </Style>
+
+  <!-- Status colours: idle by default, then downloading, seeding, and error on top. -->
+  <Style Selector="ProgressBar.status">
+    <Setter Property="Foreground" Value="{DynamicResource StatusIdleBrush}" />
+    <Setter Property="Background" Value="{DynamicResource ProgressTrackBrush}" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Height" Value="4" />
+    <Setter Property="CornerRadius" Value="2" />
+  </Style>
+  <Style Selector="ProgressBar.status.downloading">
+    <Setter Property="Foreground" Value="{DynamicResource StatusDownloadingBrush}" />
+  </Style>
+  <Style Selector="ProgressBar.status.seeding">
+    <Setter Property="Foreground" Value="{DynamicResource StatusSeedingBrush}" />
+  </Style>
+  <Style Selector="ProgressBar.status.error">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialValidationErrorBrush}" />
+  </Style>
+  <Style Selector="icons|MaterialIcon.status">
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Foreground" Value="{DynamicResource StatusIdleBrush}" />
+  </Style>
+  <Style Selector="icons|MaterialIcon.status.downloading">
+    <Setter Property="Foreground" Value="{DynamicResource StatusDownloadingBrush}" />
+  </Style>
+  <Style Selector="icons|MaterialIcon.status.seeding">
+    <Setter Property="Foreground" Value="{DynamicResource StatusSeedingBrush}" />
+  </Style>
+  <Style Selector="icons|MaterialIcon.status.error">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialValidationErrorBrush}" />
+  </Style>
+
+  <!-- Connection dot in the status bar -->
+  <Style Selector="Ellipse.dot">
+    <Setter Property="Width" Value="8" />
+    <Setter Property="Height" Value="8" />
+    <Setter Property="Fill" Value="{DynamicResource StatusIdleBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Ellipse.dot.connected">
+    <Setter Property="Fill" Value="{DynamicResource ConnectedBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.connecting">
+    <Setter Property="Fill" Value="{DynamicResource ConnectingBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.warning">
+    <Setter Property="Fill" Value="{DynamicResource ConnectingBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.error">
+    <Setter Property="Fill" Value="{DynamicResource MaterialValidationErrorBrush}" />
+  </Style>
+</Styles>

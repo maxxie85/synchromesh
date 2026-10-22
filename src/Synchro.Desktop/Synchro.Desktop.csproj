@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Synchro.Desktop</RootNamespace>
+    <!-- The executable (and avares:// resource) name users see in Task Manager, Activity Monitor and firewall prompts. -->
+    <AssemblyName>Synchromesh</AssemblyName>
+    <Product>Synchromesh</Product>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <!-- Publishing for Windows (-r win-x64 / win-arm64): the Windows build of .NET, for toast notifications through
+       the Windows SDK, plus the Windows platform project. Builds without a Windows runtime (macOS, tests) stay net10.0.
+       Defines the WINDOWS symbol, used only in CompositionRoot and Program. -->
+  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win-'))">
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win-'))">
+    <ProjectReference Include="..\Synchro.Platform.Windows\Synchro.Platform.Windows.csproj" />
+    <!-- Next to the .exe for the notification icon (WindowsNotifier registers its path). -->
+    <Content Include="Assets\AppIcon.png" Link="AppIcon.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Synchro.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Generated from build/icon/AppIcon.svg by build/icon/make-icns.sh. -->
+    <AvaloniaResource Include="Assets\**" />
+    <!-- Shown by Licence texts in About. -->
+    <AvaloniaResource Include="..\..\LICENSE" Link="Assets\LICENSE.txt" />
+    <AvaloniaResource Include="..\..\THIRD-PARTY-NOTICES.txt" Link="Assets\THIRD-PARTY-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Material.Avalonia" />
+    <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="SimpleInjector" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Synchro.Core\Synchro.Core.csproj" />
+    <ProjectReference Include="..\Synchro.Transmission\Synchro.Transmission.csproj" />
+    <ProjectReference Include="..\Synchro.AppServices\Synchro.AppServices.csproj" />
+    <ProjectReference Include="..\Synchro.ViewModels\Synchro.ViewModels.csproj" />
+    <ProjectReference Include="..\Synchro.Platform.MacOS\Synchro.Platform.MacOS.csproj" />
+    <ProjectReference Include="..\Synchro.Platform.Linux\Synchro.Platform.Linux.csproj" />
+  </ItemGroup>
+</Project>

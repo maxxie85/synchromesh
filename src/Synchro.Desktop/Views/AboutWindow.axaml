@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="Synchro.Desktop.Views.AboutWindow"
+        x:DataType="vm:AboutViewModel"
+        Title="About Synchromesh"
+        Width="420" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="24" Spacing="6">
+    <Image Source="avares://Synchromesh/Assets/AppIcon.png" Width="96" Height="96" HorizontalAlignment="Center" />
+    <TextBlock Classes="headline6" Text="{x:Static vm:AboutViewModel.AppName}" HorizontalAlignment="Center" />
+    <TextBlock Classes="secondary" Text="{Binding Version}" HorizontalAlignment="Center" />
+    <TextBlock Classes="secondary" Text="A desktop client for Transmission 4.1 and later."
+               TextWrapping="Wrap" TextAlignment="Center" />
+    <TextBlock Classes="secondary" FontSize="12" Text="{x:Static vm:AboutViewModel.Copyright}"
+               HorizontalAlignment="Center" Margin="0,8,0,0" />
+    <TextBlock Classes="secondary" FontSize="12" Text="{x:Static vm:AboutViewModel.AppLicense}"
+               TextWrapping="Wrap" TextAlignment="Center" />
+
+    <TextBlock Classes="section" Text="OPEN-SOURCE COMPONENTS" Margin="0,16,0,2" />
+    <ItemsControl ItemsSource="{Binding Components}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:OpenSourceComponent">
+          <Button Classes="component" Command="{Binding $parent[Window].((vm:AboutViewModel)DataContext).OpenComponentCommand}"
+                  CommandParameter="{Binding}" ToolTip.Tip="{Binding Url}">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+              <TextBlock Text="{Binding Name}" />
+              <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding License}" />
+              <icons:MaterialIcon Grid.Column="2" Kind="OpenInNew" Width="14" Height="14" Opacity="0.6" />
+            </Grid>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <StackPanel Classes="actions" Margin="0,16,0,0">
+      <Button Theme="{StaticResource MaterialOutlineButton}" Content="License texts…" Click="OnLicensesClick" />
+      <Button Content="OK" IsDefault="True" IsCancel="True" Click="OnOkClick" />
+    </StackPanel>
+  </StackPanel>
+  <Window.Styles>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Opacity" Value="0.7" />
+    </Style>
+    <!-- Rows that open the component's page: flat, full width, a hover tint only. -->
+    <Style Selector="Button.component">
+      <Setter Property="Theme" Value="{StaticResource MaterialFlatButton}" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="8,4" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialBodyBrush}" />
+    </Style>
+  </Window.Styles>
+</Window>

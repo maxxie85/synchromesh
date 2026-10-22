@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:views="clr-namespace:Synchro.Desktop.Views"
+        x:Class="Synchro.Desktop.Views.AddTorrentWindow"
+        x:DataType="vm:AddTorrentViewModel"
+        Title="Add torrent"
+        Width="680" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="24" Spacing="16">
+
+    <!-- Step 1. Source: a link, or a chosen .torrent file -->
+    <StackPanel Spacing="8" IsVisible="{Binding ShowsChooseFilesFirst}">
+      <TextBox Classes="outline" assists:TextFieldAssist.Label="Magnet link or torrent URL"
+               Text="{Binding LinkText}" PlaceholderText="magnet:?xt=urn:btih:…" />
+      <TextBlock Classes="error caption" Text="{Binding LinkError}" IsVisible="{Binding HasLinkError}" TextWrapping="Wrap" />
+      <Button Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}" Command="{Binding ChooseFileCommand}" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <icons:MaterialIcon Kind="FileOutline" Width="18" Height="18" />
+          <TextBlock Text="Choose a .torrent file…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+
+    <!-- After a link was added: its name, then the wait for its file list. -->
+    <StackPanel Spacing="4" IsVisible="{Binding !IsInput}">
+      <TextBlock Classes="caption secondary" Text="Adding" />
+      <TextBlock Text="{Binding TorrentName}" FontWeight="Medium" TextTrimming="CharacterEllipsis"
+                 ToolTip.Tip="{Binding TorrentName}" />
+    </StackPanel>
+    <StackPanel Spacing="8" IsVisible="{Binding IsFetchingFiles}">
+      <ProgressBar IsIndeterminate="True" />
+      <TextBlock Classes="secondary" Text="{Binding FetchText}" TextWrapping="Wrap" />
+      <TextBlock Classes="caption secondary" TextWrapping="Wrap"
+                 Text="The torrent is on the server, getting its file list. It is stopped while you choose; Cancel removes it again." />
+    </StackPanel>
+
+    <Grid IsVisible="{Binding HasFile}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+      <icons:MaterialIcon Kind="FileOutline" Width="24" Height="24" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="1" Spacing="2">
+        <TextBlock Classes="caption secondary" Text="Torrent file" />
+        <TextBlock Text="{Binding FileSummary}" FontWeight="Medium" TextTrimming="CharacterEllipsis"
+                   ToolTip.Tip="{Binding FileSummary}" />
+      </StackPanel>
+      <Button Grid.Column="2" Theme="{StaticResource MaterialFlatButton}" Content="Use a link instead"
+              Command="{Binding RemoveFileCommand}" VerticalAlignment="Center" />
+    </Grid>
+
+    <!-- Files to download: a .torrent with more than one file, or a link once its file list arrived. -->
+    <Border IsVisible="{Binding HasFileChoice}" BorderThickness="1" CornerRadius="4"
+            BorderBrush="{DynamicResource MaterialDividerBrush}">
+      <DockPanel>
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="16,6,16,8">
+          <TextBlock Classes="secondary" Text="{Binding Files.Summary}" FontSize="12" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" Classes="error" FontSize="12" Text="Select at least one file to download."
+                     IsVisible="{Binding Files.NothingWanted}" />
+        </Grid>
+        <views:FileTreeView DataContext="{Binding Files}" MaxHeight="280" />
+      </DockPanel>
+    </Border>
+
+    <!-- Destination (a folder on the server, not on this Mac); sent with the add, so only in the first step. -->
+    <StackPanel Spacing="4" IsVisible="{Binding IsInput}">
+      <TextBox Classes="outline" assists:TextFieldAssist.Label="Download folder on the server"
+               Text="{Binding DownloadDirectory}" PlaceholderText="The server's default folder" />
+      <TextBlock Classes="caption secondary" Text="{Binding FreeSpaceText}" IsVisible="{Binding HasFreeSpace}" Margin="4,0" />
+    </StackPanel>
+
+    <StackPanel Spacing="10">
+      <ToggleSwitch Content="Choose files before downloading" IsChecked="{Binding ChooseFilesFirst}"
+                IsVisible="{Binding ShowsChooseFilesFirst}"
+                ToolTip.Tip="Adds the link paused, waits for its file list, and lets you pick what to download." />
+      <ToggleSwitch Content="Don't start downloading yet" IsChecked="{Binding StartPaused}"
+                IsVisible="{Binding !IsFetchingFiles}" />
+      <ToggleSwitch Content="Download in order, to play while it downloads" IsChecked="{Binding SequentialDownload}"
+                IsVisible="{Binding IsInput}"
+                ToolTip.Tip="Fetches pieces from the start instead of rarest first. You can change this later in the Options tab." />
+    </StackPanel>
+
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsAdding}" />
+    <TextBlock Classes="error" Text="{Binding StatusMessage}" IsVisible="{Binding HasStatus}" TextWrapping="Wrap" />
+
+    <Grid ColumnDefinitions="Auto,*,Auto">
+      <Button Theme="{StaticResource MaterialOutlineButton}" Foreground="{DynamicResource IconAccentBrush}"
+              Content="Download everything" Command="{Binding DownloadEverythingCommand}"
+              IsVisible="{Binding IsFetchingFiles}" ToolTip.Tip="Don't wait for the file list: download all files." />
+      <StackPanel Grid.Column="2" Classes="actions" Margin="0">
+        <Button Theme="{StaticResource MaterialFlatButton}" Content="{Binding CancelButtonText}"
+                Command="{Binding CancelCommand}" IsCancel="True" />
+        <Button Content="{Binding AddButtonText}" Command="{Binding AddCommand}" IsDefault="True"
+                IsVisible="{Binding !IsFetchingFiles}" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</Window>
