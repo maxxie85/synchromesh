@@ -5,7 +5,7 @@
 <h1 align="center">Synchromesh</h1>
 
 <p align="center">
-  A fast, native-feeling desktop remote for your <a href="https://transmissionbt.com">Transmission</a> server.<br>
+  A cross-platform .NET desktop client to control a <a href="https://transmissionbt.com">Transmission</a> server.<br>
   For macOS, Windows and Linux.
 </p>
 
@@ -21,31 +21,42 @@
   <img alt="Synchromesh: the torrent list with a torrent's details, and the speed graph, storage and statistics in the sidebar" src="docs/screenshots/main-light.png">
 </picture>
 
-Synchromesh runs on your computer and controls Transmission wherever it runs: a NAS, a home server, a seedbox. See
-every torrent at a glance, add new ones from a file or a magnet link, and change the server's settings, without
-opening a browser.
+Control your Transmission server from a familiar desktop client.
+Implements most of the RPC API. Currently supported: RPC 6.0.0, JSON-RPC 2.0. By default, communication uses the gzipped transport to reduce traffic.
 
-> A *synchromesh* is the part of a gearbox that matches the speeds of two gears so they mesh smoothly.
+By default, Synchromesh stores server credentials in the macOS Keychain, Windows Credential Manager or the Linux keyring.
+If desired, you can choose to store the credentials in an encrypted file, with the possibility of a master password.
+
+> A *synchromesh* is a brass ring that synchronises the speed between two different gears in a transmission.
 > Synchromesh is an independent project, not affiliated with the Transmission project.
 
 ## Features
 
-**Your torrents, live.** The list updates every two seconds and stays quick with thousands of torrents. Filter by
-status or by your own labels, search by name, and change the queue order. Start, stop, verify, re-announce, move or
-remove torrents, one at a time or many at once.
+**Torrent overview.** The overview updates every two seconds. Filter by
+status or by labels, search by name, and:
+- change the queue order
+- start
+- stop
+- verify
+- re-announce
+- move or delete torrents, one at a time or many at once.
 
-**Everything about one torrent.** The details panel shows its transfer and its trackers, the peers it's connected
-to, and its files. Choose which files to download and their priority, rename files and folders, and set the
-torrent's own speed limits, seeding goals and sequential download.
+**Torrent details.**
+The details panel shows general information, the tracker list, the peer list, the file list and per-torrent options.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/files-dark.png">
   <img alt="The Files tab: a torrent's folders and files with progress, what to download and priorities" src="docs/screenshots/files-light.png">
 </picture>
 
-**Add torrents your way.** Drop a `.torrent` file on the window, paste a magnet link, or open either from your
-browser or file manager. Before the download starts, pick the files you want, their priority, the folder on the
-server, and whether to download in order so you can watch while it downloads.
+**Add torrents.**
+Synchromesh supports the following ways to add new torrents:
+- drag and drop a `.torrent` file on the window
+- paste a magnet link
+- open `.torrent` files and `magnet:` links from your browser or file manager (Synchromesh registers as their handler)
+
+Before the download starts, pick the files you want, their priority, the folder on the
+server, and whether to download in order.
 
 <p align="center">
   <picture>
@@ -54,9 +65,12 @@ server, and whether to download in order so you can watch while it downloads.
   </picture>
 </p>
 
-**The whole server, not just its torrents.** Switch between several servers. Set speed limits and flip the
-alternative-speed "turtle" with one click. Change the server's own preferences (folders, queues, seeding, peers,
-encryption, the blocklist) and check whether its port is open. The sidebar shows the total speed over the last
+**Settings.**
+Switch between several servers. Set speed limits and flip the
+alternative-speed "turtle" with one click. Modify the server's preferences (folders, queues, seeding, peers,
+encryption, the blocklist) and check whether its port is open.
+
+The sidebar shows the total speed over the last
 minutes, the free space on the server's disk, and transfer statistics.
 
 <p align="center">
@@ -66,19 +80,11 @@ minutes, the free space on the server's disk, and transfer statistics.
   </picture>
 </p>
 
-**Feels at home on your computer.**
+**Additional features.**
 - Notifications when a download finishes or a torrent runs into an error.
-- Light and dark mode that follows your system.
-- Opens `.torrent` files and magnet links handed over by your browser or file manager, in the window that's
-  already open.
+- Choose between light, dark or system theme.
 - Native menus and keyboard shortcuts.
-
-**Safe with your passwords.**
-- Server passwords go to your system's keychain: the macOS Keychain, Windows Credential Manager or the Linux
-  keyring.
-- If you'd rather not use it, or your system has none (a Steam Deck, for example), Synchromesh keeps them in its own
-  encrypted file instead, optionally locked with a master password.
-- HTTPS and client certificates are supported for servers behind a proxy.
+- HTTPS and client certificate support.
 
 ## Download
 
@@ -90,7 +96,7 @@ Get the latest version from the [releases page](https://github.com/maxxie85/sync
 | Windows 10 or 11, x64 or ARM64 | `Synchromesh-<version>-windows-<arch>-setup.exe` | Run it; it installs for your user, no administrator rights needed. |
 | Linux, x64 or ARM64 | `Synchromesh-<version>-linux-<arch>.tar.gz` | Unpack it and run `./install.sh` in the folder. |
 
-The apps aren't signed by a registered developer yet, so the first start needs one confirmation:
+The apps aren't signed yet, so the first start needs one confirmation:
 
 - **macOS** stops the app the first time. Open it once, then go to System Settings > Privacy & Security and click
   **Open Anyway**. To open `.torrent` files with it, use Get Info on a `.torrent` file in Finder > Open with >
@@ -104,8 +110,7 @@ The apps aren't signed by a registered developer yet, so the first start needs o
 ## Requirements
 
 - **Transmission 4.1 or newer** on the server, with remote access (RPC) turned on. Synchromesh speaks Transmission's
-  modern JSON-RPC 2.0 interface; older versions use a different protocol and aren't supported.
-- If you use a username and password for remote access, have them at hand for the first start.
+  modern JSON-RPC 2.0 interface; older versions use a different protocol and aren't supported as of now.
 
 ## Where your data is kept
 

@@ -9,7 +9,7 @@
   <StackPanel Margin="24" Spacing="14">
     <TextBlock Classes="subtitle1" Text="{Binding Message}" TextWrapping="Wrap" />
     <TextBlock Classes="secondary" Text="{Binding Detail}" TextWrapping="Wrap" />
-    <ToggleSwitch Content="Also delete the downloaded files" IsChecked="{Binding DeleteLocalData}" />
+    <ToggleSwitch Content="Delete downloaded files" IsChecked="{Binding DeleteLocalData}" />
     <StackPanel Classes="actions">
       <Button Theme="{StaticResource MaterialFlatButton}" Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
       <Button Content="Remove" Command="{Binding ConfirmCommand}" />

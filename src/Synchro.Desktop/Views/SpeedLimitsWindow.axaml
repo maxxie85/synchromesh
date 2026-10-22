@@ -8,7 +8,7 @@
         Width="460" SizeToContent="Height" CanResize="False"
         WindowStartupLocation="CenterOwner">
   <StackPanel Margin="24" Spacing="16">
-    <TextBlock Classes="secondary" Text="These limits apply to the whole server, not just this app." TextWrapping="Wrap" />
+    <TextBlock Classes="secondary" Text="Server limits." TextWrapping="Wrap" />
     <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
     <TextBlock Classes="error" Text="{Binding LoadError}" IsVisible="{Binding HasLoadError}" TextWrapping="Wrap" />
 
@@ -22,7 +22,7 @@
       <TextBox Grid.Row="1" Grid.Column="1" Classes="outline" assists:TextFieldAssist.Label="kB/s" Text="{Binding UploadLimit}" IsEnabled="{Binding UploadLimited}" />
     </Grid>
 
-    <ToggleSwitch Content="Use the server's alternative speed limits" IsChecked="{Binding AlternativeSpeedsEnabled}" />
+    <ToggleSwitch Content="Use alternative speed limits" IsChecked="{Binding AlternativeSpeedsEnabled}" />
     </StackPanel>
 
     <StackPanel Classes="actions">

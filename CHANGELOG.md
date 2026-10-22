@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-22
+
+### Changed
+- Updated readme
+- Changed strings in various windows to reel less vibed.
+
 ## [1.0.0] - 2026-10-22
 
 The first public release.
