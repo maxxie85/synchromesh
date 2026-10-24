@@ -195,7 +195,11 @@ change it, then what is still open.
   `free_space` on the default download folder, refreshed on connect and every minute, red below 10% free, cleared
   when switching servers, last values kept through a dropped connection), then the `session_stats` totals.
 - **Connection setup:** address, port, user and password (Keychain / Credential Manager), RPC path, HTTPS, optional
-  client certificate and key (see Protocol facts).
+  client certificate and key (see Protocol facts). The address is checked by `HostAddress` (Core), wired in with
+  `[CustomValidation]`: host names per RFC 1123/1035 (no all-numeric last label, RFC 3696; IDN via its ASCII form),
+  IPv4 per RFC 3986 dec-octet (four parts, 0–255, no leading zeros; `IPAddress.TryParse` is too lenient: it takes
+  `1.2.3` and `0x7f.1`), IPv6 per RFC 4291 with optional brackets and a zone (RFC 4007/6874; `UriBuilder` brackets
+  it and keeps the zone).
 - **Where passwords live:** `AppCredentialStore` (AppServices) is the app's `ICredentialStore` and `IPasswordStorage`,
   wrapping the platform store (registered by type in `CompositionRoot`) and `PasswordFile` (AES-256-GCM, key file,
   see Linux). Settings > Servers has "Keep passwords in Synchromesh's own encrypted file"
