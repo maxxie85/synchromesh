@@ -38,8 +38,12 @@ public sealed partial class ServerSetupViewModel : ObservableValidator
     [NotifyDataErrorInfo]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand), nameof(TestCommand))]
     [Required(ErrorMessage = "Enter the server's address.")]
-    [RegularExpression(@"^\s*[^\s/]+\s*$", ErrorMessage = "Use a host name or IP address only, without http:// or a path.")]
+    [CustomValidation(typeof(ServerSetupViewModel), nameof(ValidateHost))]
     private string _host = "";
+
+    /// <summary>A host name, IPv4 or IPv6 address by its RFC (<see cref="HostAddress"/>); surrounding spaces are fine.</summary>
+    public static ValidationResult? ValidateHost(string host, ValidationContext context)
+        => HostAddress.Validate(host) is { } problem ? new ValidationResult(problem) : ValidationResult.Success;
 
     [ObservableProperty]
     [NotifyDataErrorInfo]

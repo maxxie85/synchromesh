@@ -31,7 +31,9 @@ public class ServerSetupViewModelTests
     [InlineData("http://nas.local")]
     [InlineData("nas.local/transmission")]
     [InlineData("nas local")]
-    public void Rejects_an_address_with_a_scheme_path_or_spaces(string host)
+    [InlineData("1921.168.1.20")]
+    [InlineData("nas..local")]
+    public void Rejects_an_invalid_address(string host)
     {
         var vm = Create();
 
@@ -45,6 +47,7 @@ public class ServerSetupViewModelTests
     [InlineData(" nas.local")]
     [InlineData("nas.local ")]
     [InlineData("192.168.1.20")]
+    [InlineData("fe80::1%en0")]
     public void Accepts_an_address_with_surrounding_whitespace(string host)
     {
         var vm = Create();
@@ -230,5 +233,15 @@ public class ServerSetupViewModelTests
         _passwordFile.Received(1).Enable();
         Assert.NotNull(saved);
         Assert.False(vm.CanUsePasswordFile);
+    }
+
+    [Fact]
+    public void A_mistyped_ip_address_says_which_number_is_wrong()
+    {
+        var vm = Create();
+
+        vm.Host = "1921.168.1.20";
+
+        Assert.Contains("1921 is too large", vm.GetErrors(nameof(ServerSetupViewModel.Host)).Cast<System.ComponentModel.DataAnnotations.ValidationResult>().Single().ErrorMessage);
     }
 }
