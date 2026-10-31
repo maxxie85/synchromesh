@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using NSubstitute;
 using SimpleInjector;
 using Synchro.Core.Notifications;
@@ -49,7 +50,7 @@ foreach (var (variant, suffix) in new[] { (ThemeVariant.Light, "light"), (ThemeV
     container.GetInstance<SpeedHistoryViewModel>().Seed(DemoServer.SpeedHistory());
     Pump(TimeSpan.FromSeconds(5));
 
-    var list = window.FindControl<ListBox>("TorrentListBox")!;
+    var list = window.GetVisualDescendants().OfType<ListBox>().First(l => l.Name == "TorrentListBox");
     list.SelectedItem = main.TorrentList.VisibleTorrents.First(t => t.Name == DemoServer.Featured);
     Pump(TimeSpan.FromSeconds(3));
     Save(window, "main", suffix);

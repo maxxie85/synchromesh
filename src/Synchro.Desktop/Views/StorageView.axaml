@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             x:Class="Synchro.Desktop.Views.StorageView"
+             x:DataType="vm:StorageViewModel">
+  <!-- Used and free space on the server's download disk. -->
+  <StackPanel Spacing="4" IsVisible="{Binding HasStorage}" ToolTip.Tip="{Binding Folder}">
+    <TextBlock Classes="header" Text="STORAGE" />
+    <ProgressBar Classes="status downloading" Minimum="0" Maximum="100" Value="{Binding UsedPercent}"
+                 Classes.error="{Binding IsLow}" IsVisible="{Binding HasTotal}" Margin="0,2" />
+    <TextBlock Text="{Binding Summary}" FontSize="12" TextTrimming="CharacterEllipsis"
+               Classes.error="{Binding IsLow}" />
+    <TextBlock Classes="secondary" Text="{Binding TotalText}" FontSize="12"
+               IsVisible="{Binding HasTotal}" TextTrimming="CharacterEllipsis" />
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:settings="clr-namespace:Synchro.ViewModels.Settings;assembly=Synchro.ViewModels"
+             x:Class="Synchro.Desktop.Views.ToolbarView"
+             x:DataType="vm:MainWindowViewModel">
+  <!-- App bar: the main action first, then actions on the selection, then search and server. -->
+  <Border Padding="16,10" BorderThickness="0,0,0,1"
+          BorderBrush="{DynamicResource MaterialDividerBrush}">
+    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="8">
+      <Button Command="{Binding Toolbar.AddCommand}" ToolTip.Tip="Add a torrent file or magnet link">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <icons:MaterialIcon Kind="Plus" Width="20" Height="20" />
+          <TextBlock Text="Add" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="12,0,0,0">
+        <Button Classes="bar" Command="{Binding Toolbar.StartCommand}" ToolTip.Tip="Start">
+          <icons:MaterialIcon Kind="Play" />
+        </Button>
+        <Button Classes="bar" Command="{Binding Toolbar.StopCommand}" ToolTip.Tip="Stop">
+          <icons:MaterialIcon Kind="Pause" />
+        </Button>
+        <Button Classes="bar" Command="{Binding Toolbar.RemoveCommand}" ToolTip.Tip="Remove…">
+          <icons:MaterialIcon Kind="DeleteOutline" />
+        </Button>
+        <Rectangle Width="1" Height="24" Margin="6,0" Fill="{DynamicResource MaterialDividerBrush}" />
+        <Button Classes="bar" ToolTip.Tip="Queue order">
+          <icons:MaterialIcon Kind="FormatListNumbered" />
+          <Button.Flyout>
+            <MenuFlyout Placement="BottomEdgeAlignedLeft">
+              <MenuItem Header="Move to top" Command="{Binding Toolbar.MoveToTopCommand}" />
+              <MenuItem Header="Move up" Command="{Binding Toolbar.MoveUpCommand}" />
+              <MenuItem Header="Move down" Command="{Binding Toolbar.MoveDownCommand}" />
+              <MenuItem Header="Move to bottom" Command="{Binding Toolbar.MoveToBottomCommand}" />
+            </MenuFlyout>
+          </Button.Flyout>
+        </Button>
+        <Button Classes="bar" Command="{Binding Toolbar.SpeedLimitsCommand}" ToolTip.Tip="Speed limits…">
+          <icons:MaterialIcon Kind="Speedometer" />
+        </Button>
+        <!-- Turtle: the server's alternative speed limits. Shown filled and tinted while they're on. -->
+        <ToggleButton Classes="bar turtle" IsChecked="{Binding AltSpeed.IsEnabled, Mode=OneWay}"
+                      Command="{Binding AltSpeed.ToggleCommand}" ToolTip.Tip="{Binding AltSpeed.ToolTip}">
+          <icons:MaterialIcon Kind="Turtle" />
+        </ToggleButton>
+      </StackPanel>
+
+      <Border Grid.Column="3" Classes="search" Width="280" VerticalAlignment="Center">
+        <TextBox x:Name="SearchBox" Classes="solo" Background="Transparent" VerticalAlignment="Center"
+                 PlaceholderText="Search torrents" Text="{Binding TorrentList.SearchText}">
+          <TextBox.InnerLeftContent>
+            <icons:MaterialIcon Kind="Magnify" Width="20" Height="20" Margin="8,0,0,0" Opacity="0.6" />
+          </TextBox.InnerLeftContent>
+        </TextBox>
+      </Border>
+      <!-- Server menu: the connected server; pick another one, or manage the list in Settings. -->
+      <Button x:Name="ServerMenuButton" Grid.Column="4" Classes="server" ToolTip.Tip="Switch server">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <icons:MaterialIcon Kind="ServerNetwork" Width="20" Height="20" />
+          <TextBlock Text="{Binding Servers.ActiveServerName}" VerticalAlignment="Center" MaxWidth="180"
+                     TextTrimming="CharacterEllipsis" />
+          <icons:MaterialIcon Kind="MenuDown" Width="18" Height="18" />
+        </StackPanel>
+        <Button.Flyout>
+          <Flyout Placement="BottomEdgeAlignedRight">
+            <StackPanel MinWidth="240" Spacing="2" Margin="0,4">
+              <ItemsControl ItemsSource="{Binding Servers.Servers}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="settings:ServerItemViewModel">
+                    <Button Classes="menu" Click="OnServerMenuItemClick"
+                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Servers.ConnectCommand}"
+                            CommandParameter="{Binding}">
+                      <Grid ColumnDefinitions="24,*" ColumnSpacing="8">
+                        <icons:MaterialIcon Kind="Check" Width="18" Height="18" IsVisible="{Binding IsActive}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Name}" />
+                          <TextBlock Classes="secondary" Text="{Binding Address}" FontSize="11" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Separator Margin="0,4" />
+              <Button Classes="menu" Click="OnServerMenuItemClick" Command="{Binding OpenSettingsCommand}">
+                <Grid ColumnDefinitions="24,*" ColumnSpacing="8">
+                  <icons:MaterialIcon Kind="Cog" Width="18" Height="18" />
+                  <TextBlock Grid.Column="1" Text="Settings…" VerticalAlignment="Center" />
+                </Grid>
+              </Button>
+            </StackPanel>
+          </Flyout>
+        </Button.Flyout>
+      </Button>
+    </Grid>
+  </Border>
+</UserControl>

@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:conv="clr-namespace:Synchro.Desktop.Converters"
+             xmlns:sort="clr-namespace:Synchro.Core.Settings;assembly=Synchro.Core"
+             x:Class="Synchro.Desktop.Views.TorrentListView"
+             x:DataType="vm:MainWindowViewModel">
+  <!-- The torrents: column headers that sort, then the rows. Selection is owned by TorrentListViewModel. -->
+  <Grid RowDefinitions="Auto,*">
+    <!-- Column headers: same column widths as the row template below. A click anywhere in a column's header (its
+         whole width and height) sorts by that column, again: the other direction; the sorted one shows an arrow. Numbers are right-aligned, with the arrow before them. -->
+    <Grid ColumnDefinitions="28,*,70,140,120,80,80,70,50" ColumnSpacing="12" Margin="16,0">
+      <Button Grid.Column="0" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Queue}"
+              ToolTip.Tip="Sort by queue order">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Queue}}" />
+          <TextBlock Classes="header" Text="#" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="1" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Left"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Name}"
+              ToolTip.Tip="Sort by name">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <TextBlock Classes="header" Text="Name" VerticalAlignment="Center" />
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Name}}" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="2" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Size}"
+              ToolTip.Tip="Sort by size">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Size}}" />
+          <TextBlock Classes="header" Text="Size" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="3" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Left"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Progress}"
+              ToolTip.Tip="Sort by progress">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <TextBlock Classes="header" Text="Progress" VerticalAlignment="Center" />
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Progress}}" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="4" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Left"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Status}"
+              ToolTip.Tip="Sort by status">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <TextBlock Classes="header" Text="Status" VerticalAlignment="Center" />
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Status}}" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="5" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Download}"
+              ToolTip.Tip="Sort by download speed">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Download}}" />
+          <TextBlock Classes="header" Text="Down" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="6" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Upload}"
+              ToolTip.Tip="Sort by upload speed">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Upload}}" />
+          <TextBlock Classes="header" Text="Up" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="7" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Eta}"
+              ToolTip.Tip="Sort by time left">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Eta}}" />
+          <TextBlock Classes="header" Text="ETA" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="8" Theme="{StaticResource SortHeaderButton}" HorizontalContentAlignment="Right"
+              Command="{Binding TorrentList.SortByCommand}" CommandParameter="{x:Static sort:TorrentSortColumn.Ratio}"
+              ToolTip.Tip="Sort by ratio">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <icons:MaterialIcon Kind="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.Arrow}}" Width="16" Height="16"
+                              Foreground="{DynamicResource MaterialBodyLightBrush}"
+                              IsVisible="{Binding TorrentList.Sort, Converter={x:Static conv:SortConverters.IsColumn}, ConverterParameter={x:Static sort:TorrentSortColumn.Ratio}}" />
+          <TextBlock Classes="header" Text="Ratio" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </Grid>
+
+    <ListBox x:Name="TorrentListBox" Grid.Row="1" Classes="torrents"
+             ItemsSource="{Binding TorrentList.VisibleTorrents}"
+             SelectionMode="Multiple" AutoScrollToSelectedItem="False">
+      <ListBox.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Start" Command="{Binding Toolbar.StartCommand}" />
+          <MenuItem Header="Start now" Command="{Binding Toolbar.StartNowCommand}" />
+          <MenuItem Header="Stop" Command="{Binding Toolbar.StopCommand}" />
+          <MenuItem Header="Remove…" Command="{Binding Toolbar.RemoveCommand}" />
+          <Separator />
+          <MenuItem Header="Rename…" Command="{Binding Toolbar.RenameCommand}" />
+          <MenuItem Header="Labels…" Command="{Binding Toolbar.EditLabelsCommand}" />
+          <MenuItem Header="Move data…" Command="{Binding Toolbar.MoveDataCommand}" />
+          <MenuItem Header="Verify local data" Command="{Binding Toolbar.VerifyCommand}" />
+          <MenuItem Header="Ask trackers for more peers" Command="{Binding Toolbar.ReannounceCommand}" />
+          <Separator />
+          <MenuItem Header="Move to top" Command="{Binding Toolbar.MoveToTopCommand}" />
+          <MenuItem Header="Move up" Command="{Binding Toolbar.MoveUpCommand}" />
+          <MenuItem Header="Move down" Command="{Binding Toolbar.MoveDownCommand}" />
+          <MenuItem Header="Move to bottom" Command="{Binding Toolbar.MoveToBottomCommand}" />
+        </ContextMenu>
+      </ListBox.ContextMenu>
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:TorrentItemViewModel">
+          <Grid ColumnDefinitions="28,*,70,140,120,80,80,70,50" ColumnSpacing="12">
+            <TextBlock Grid.Column="0" Classes="number secondary" Text="{Binding QueueText}" VerticalAlignment="Center" />
+            <Grid Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"
+                         ToolTip.Tip="{Binding Name}" VerticalAlignment="Center" />
+              <icons:MaterialIcon Grid.Column="1" Kind="TagOutline" Width="14" Height="14" Opacity="0.6"
+                                  IsVisible="{Binding HasLabels}" ToolTip.Tip="{Binding LabelsText}" />
+            </Grid>
+            <TextBlock Grid.Column="2" Classes="number" Text="{Binding SizeText}" VerticalAlignment="Center" />
+            <Grid Grid.Column="3" ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+              <ProgressBar Classes="status" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                           Classes.downloading="{Binding Status, Converter={x:Static conv:StatusConverters.IsDownloading}}"
+                           Classes.seeding="{Binding Status, Converter={x:Static conv:StatusConverters.IsSeeding}}"
+                           Classes.error="{Binding HasError}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
+                         MinWidth="34" TextAlignment="Right" />
+            </Grid>
+            <DockPanel Grid.Column="4" HorizontalSpacing="6" VerticalAlignment="Center"
+                       ToolTip.Tip="{Binding ErrorText}">
+              <icons:MaterialIcon Classes="status" IsVisible="{Binding !HasError}"
+                                  Kind="{Binding Status, Converter={x:Static conv:IconConverters.Status}}"
+                                  Classes.downloading="{Binding Status, Converter={x:Static conv:StatusConverters.IsDownloading}}"
+                                  Classes.seeding="{Binding Status, Converter={x:Static conv:StatusConverters.IsSeeding}}" />
+              <icons:MaterialIcon Classes="status error" Kind="AlertCircleOutline" IsVisible="{Binding HasError}" />
+              <TextBlock Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" Classes.error="{Binding HasError}" />
+            </DockPanel>
+            <TextBlock Grid.Column="5" Classes="number" Text="{Binding DownloadText}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="6" Classes="number" Text="{Binding UploadText}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="7" Classes="number" Text="{Binding EtaText}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="8" Classes="number" Text="{Binding RatioText}" VerticalAlignment="Center" />
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <TextBlock Grid.Row="1" Text="{Binding TorrentList.EmptyMessage}"
+               IsVisible="{Binding TorrentList.HasEmptyMessage}"
+               Classes="secondary" HorizontalAlignment="Center" VerticalAlignment="Center" />
+  </Grid>
+</UserControl>

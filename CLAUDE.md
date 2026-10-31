@@ -32,6 +32,10 @@ Always build and run the tests after a change. If your tooling does not open `.s
 - Synchro.AppServices: connection state, polling, actions, the fallback password file. (Not named "Application": that namespace would shadow Avalonia's `Application`.)
 - Synchro.ViewModels: no Avalonia reference. Everything here must stay unit-testable.
 - Synchro.Desktop: views, dialog service, `CompositionRoot`. The only place that knows the DI container.
+  `MainWindow` only holds the menus, window shortcuts, drag and drop and the layout; each panel is a UserControl
+  bound to its own view model (`StatusBarView`, `StorageView`, `StatisticsView`, `SpeedHistoryView`, `FiltersView`,
+  `TorrentDetailsView`); panels that need several view models (`ToolbarView`, `TorrentListView`, `SidebarView`) get
+  `MainWindowViewModel`. View-only code (selection sync, flyout closing, focus) lives in the panel's code-behind.
 - Platform-specific code lives in Synchro.Platform.* behind Core interfaces (`ICredentialStore`, `INotifier`). Only
   `CompositionRoot` and `Program` know platforms: `Synchro.Platform.Windows` targets `net10.0-windows10.0.19041.0` (toasts
   via the Windows SDK projections), so `Synchro.Desktop` switches to that TFM and references it only for `win-*` runtime
