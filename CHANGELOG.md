@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-31
+
 ### Added
 
 - Sort the torrent list by clicking a column header: number, name, size, progress, status, speeds, ETA or ratio.
