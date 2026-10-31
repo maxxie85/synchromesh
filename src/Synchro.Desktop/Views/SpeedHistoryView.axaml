@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:controls="clr-namespace:Synchro.Desktop.Controls"
+             x:Class="Synchro.Desktop.Views.SpeedHistoryView"
+             x:DataType="vm:SpeedHistoryViewModel">
+  <!-- Total speed over the last minutes; the scale's top value on the right of the header. -->
+  <StackPanel Spacing="4" IsVisible="{Binding HasHistory}">
+    <DockPanel HorizontalSpacing="8">
+      <TextBlock DockPanel.Dock="Right" Classes="secondary" Text="{Binding ScaleText}" FontSize="11"
+                 VerticalAlignment="Bottom" ToolTip.Tip="Top of the graph" />
+      <TextBlock Classes="header" Text="SPEED" />
+    </DockPanel>
+    <controls:SpeedGraph Height="48" Samples="{Binding Samples}" Scale="{Binding Scale}"
+                         Window="{Binding Window}"
+                         DownloadBrush="{DynamicResource StatusDownloadingBrush}"
+                         UploadBrush="{DynamicResource StatusSeedingBrush}"
+                         GridBrush="{DynamicResource MaterialDividerBrush}" />
+    <DockPanel HorizontalSpacing="8">
+      <TextBlock DockPanel.Dock="Right" Text="{Binding UploadText}" FontSize="12"
+                 Foreground="{DynamicResource StatusSeedingBrush}" ToolTip.Tip="Upload, all torrents" />
+      <TextBlock Text="{Binding DownloadText}" FontSize="12" TextTrimming="CharacterEllipsis"
+                 Foreground="{DynamicResource StatusDownloadingBrush}" ToolTip.Tip="Download, all torrents" />
+    </DockPanel>
+  </StackPanel>
+</UserControl>

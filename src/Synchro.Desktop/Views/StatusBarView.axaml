@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             x:Class="Synchro.Desktop.Views.StatusBarView"
+             x:DataType="vm:StatusBarViewModel">
+  <!-- Connection state on the left; torrent count and total speeds on the right while connected. -->
+  <Border Padding="16,6" BorderThickness="0,1,0,0"
+          BorderBrush="{DynamicResource MaterialDividerBrush}">
+    <Grid ColumnDefinitions="*,Auto">
+      <DockPanel HorizontalSpacing="8">
+        <Ellipse Classes="dot"
+                 Classes.connected="{Binding IsConnected}"
+                 Classes.connecting="{Binding IsConnecting}"
+                 Classes.warning="{Binding HasWarning}"
+                 Classes.error="{Binding HasError}" />
+        <TextBlock Text="{Binding Text}" FontSize="12" VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Text}" />
+      </DockPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Margin="16,0,0,0"
+                  IsVisible="{Binding IsConnected}">
+        <TextBlock Classes="secondary" Text="{Binding CountText}" FontSize="12" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding DownloadSpeedText}" FontSize="12" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding UploadSpeedText}" FontSize="12" VerticalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</UserControl>

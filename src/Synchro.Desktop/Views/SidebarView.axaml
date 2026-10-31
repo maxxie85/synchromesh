@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:views="clr-namespace:Synchro.Desktop.Views"
+             x:Class="Synchro.Desktop.Views.SidebarView"
+             x:DataType="vm:MainWindowViewModel">
+  <!-- Filters on top; speed graph, storage and server-wide statistics pinned at the bottom (always visible). -->
+  <Border Background="{DynamicResource SidebarBrush}">
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,12" Spacing="12">
+        <Rectangle Height="1" Fill="{DynamicResource MaterialDividerBrush}" Margin="0,0,0,-4">
+          <Rectangle.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+              <Binding Path="Statistics.HasStatistics" />
+              <Binding Path="SpeedHistory.HasHistory" />
+            </MultiBinding>
+          </Rectangle.IsVisible>
+        </Rectangle>
+        <views:SpeedHistoryView DataContext="{Binding SpeedHistory}" />
+        <views:StorageView DataContext="{Binding Storage}" />
+        <views:StatisticsView DataContext="{Binding Statistics}" />
+      </StackPanel>
+
+      <views:FiltersView DataContext="{Binding TorrentList}" />
+    </DockPanel>
+  </Border>
+</UserControl>

@@ -22,6 +22,7 @@ public sealed partial class AboutViewModel(IUrlLauncher launcher, string version
     public IReadOnlyList<OpenSourceComponent> Components { get; } =
     [
         new("Avalonia", "MIT", new Uri("https://github.com/AvaloniaUI/Avalonia")),
+        new("Avalonia.Controls.DataGrid", "MIT", new Uri("https://github.com/AvaloniaUI/Avalonia.Controls.DataGrid")),
         new("Material.Avalonia", "MIT", new Uri("https://github.com/AvaloniaCommunity/Material.Avalonia")),
         new("Roboto font", "Apache 2.0", new Uri("https://github.com/googlefonts/roboto")),
         new("Material.Icons", "MIT", new Uri("https://github.com/SKProCH/Material.Icons")),

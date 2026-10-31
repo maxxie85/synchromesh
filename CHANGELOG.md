@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-31
+
+### Added
+
+- Sort the torrent list by clicking a column header: number, name, size, progress, status, speeds, ETA or ratio.
+  Click it again to reverse the order. Sizes, progress, speeds and ratio start with the biggest first; an unknown
+  ETA or ratio always comes last. Synchromesh remembers the sort for the next start.
+
+### Changed
+
+- The torrent list is now a table with resizable columns: drag the edge between two column headers, or double-click
+  it to fit the column to its full content. Right-click a column header to fit that column, fit all columns, or
+  reset the widths. The name column takes the space that's left until you fit it, and Synchromesh remembers the
+  widths.
+
 ## [1.0.2] - 2026-10-24
 
 ### Fixed

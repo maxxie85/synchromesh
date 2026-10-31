@@ -3,13 +3,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Synchro.AppServices.Connection;
 using Synchro.AppServices.Torrents;
+using Synchro.Core.Settings;
 using Synchro.Core.Torrents;
 
 namespace Synchro.ViewModels;
 
 /// <summary>
 /// Holds every torrent of the connected server, keyed by info-hash (ids are only stable while the
-/// daemon runs), and exposes the filtered, searched slice the list view shows, in queue order.
+/// daemon runs), and exposes the filtered, searched slice the list view shows, sorted by <see cref="Sort"/> (queue
+/// order unless the user clicked a column header). Rows whose sort value changed move in place after each poll.
 /// It also owns the selection, so it survives rows being reordered or rebuilt.
 /// Updates arrive on the UI context, so no locking is needed.
 /// </summary>
@@ -31,6 +33,8 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
 
     // The first full refresh after connecting selects the top row, so the details panel has something to show.
     private bool _selectTopOnFirstLoad = true;
+
+    private Comparison<TorrentItemViewModel> _order = TorrentSorting.Comparison(TorrentSort.Default);
 
     public TorrentListViewModel(ITorrentFeed feed, IConnectionService connection)
     {
@@ -54,7 +58,7 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         _connection.StatusChanged += OnConnectionStatusChanged;
     }
 
-    public ObservableCollection<TorrentItemViewModel> VisibleTorrents { get; } = [];
+    public BulkObservableCollection<TorrentItemViewModel> VisibleTorrents { get; } = [];
     public IReadOnlyList<FilterItemViewModel> Filters { get; }
 
     /// <summary>The selected, still visible torrents in queue order.</summary>
@@ -74,6 +78,27 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
     public event EventHandler? SelectionRestoreRequested;
 
     [ObservableProperty] private FilterItemViewModel _selectedFilter;
+
+    /// <summary>The column and direction the list is sorted by; set from the saved settings at start-up.</summary>
+    [ObservableProperty] private TorrentSort _sort = TorrentSort.Default;
+
+    /// <summary>A click on a column header: that column, or the other direction when it is already sorted by it.</summary>
+    [RelayCommand]
+    private void SortBy(TorrentSortColumn column) => Sort = TorrentSorting.Toggle(Sort, column);
+
+    partial void OnSortChanged(TorrentSort value)
+    {
+        _order = TorrentSorting.Comparison(value);
+        BeginBatch();
+        try
+        {
+            Reorder();
+        }
+        finally
+        {
+            EndBatch();
+        }
+    }
 
     /// <summary>"All labels" first, then every label in use, by name. Combined with the status filter.</summary>
     public ObservableCollection<LabelFilterItemViewModel> LabelFilters { get; } = [new LabelFilterItemViewModel(null)];
@@ -159,14 +184,12 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
                     Remove(hash);
             }
 
-            var queueOrderChanged = false;
             foreach (var torrent in update.Torrents)
-                queueOrderChanged |= Upsert(torrent);
+                Upsert(torrent);
 
-            // Queue positions of several rows changed together; one clean re-sort beats moving rows
-            // one by one while the others still hold their old positions.
-            if (queueOrderChanged)
-                RebuildVisibleCore();
+            // Values the list is sorted by (queue positions, speeds, progress…) change with every poll: move the rows
+            // that are now out of place. Inserting new rows already found their place.
+            Reorder();
 
             if (update.IsFullRefresh && _selectTopOnFirstLoad)
             {
@@ -191,14 +214,11 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         _restoreNeeded = true; // the view shows the selection when the batch ends
     }
 
-    /// <returns>true when a row that stays visible changed its queue position.</returns>
-    private bool Upsert(Torrent torrent)
+    private void Upsert(Torrent torrent)
     {
-        var queueChanged = false;
         if (_byHash.TryGetValue(torrent.HashString, out var item))
         {
             _hashById.Remove(item.Id);
-            queueChanged = item.Torrent.QueuePosition != torrent.QueuePosition;
             item.Apply(torrent);
         }
         else
@@ -213,8 +233,6 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         var isShown = _visible.Contains(item.Hash);
         if (shouldShow && !isShown) InsertSorted(item);
         else if (!shouldShow && isShown) HideItem(item);
-
-        return queueChanged && shouldShow && isShown;
     }
 
     private void Remove(string hash)
@@ -259,19 +277,10 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         && (string.IsNullOrWhiteSpace(SearchText)
             || item.Name.Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase));
 
-    private static int CompareQueueOrder(TorrentItemViewModel a, TorrentItemViewModel b)
-    {
-        var byQueue = a.Torrent.QueuePosition.CompareTo(b.Torrent.QueuePosition);
-        if (byQueue != 0) return byQueue;
-
-        var byName = string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase);
-        return byName != 0 ? byName : string.CompareOrdinal(a.Hash, b.Hash);
-    }
-
     private void InsertSorted(TorrentItemViewModel item)
     {
         var index = 0;
-        while (index < VisibleTorrents.Count && CompareQueueOrder(VisibleTorrents[index], item) <= 0)
+        while (index < VisibleTorrents.Count && _order(VisibleTorrents[index], item) <= 0)
             index++;
 
         VisibleTorrents.Insert(index, item);
@@ -308,7 +317,7 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         _visible.Clear();
 
         var items = _byHash.Values.Where(IsVisible).ToList();
-        items.Sort(CompareQueueOrder);
+        items.Sort(_order);
         foreach (var item in items)
         {
             VisibleTorrents.Add(item);
@@ -320,6 +329,63 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
             _selectionChangedPending = true;
 
         _restoreNeeded = true;
+    }
+
+    /// <summary>A reorder with more rows out of place than this resets the list in one go instead of row by row.</summary>
+    internal const int MaxSingleMoves = 16;
+
+    /// <summary>
+    /// Brings the visible rows into <see cref="Sort"/> order. After a poll usually only a few rows are out of place
+    /// (a speed changed): those are removed and inserted again, so the list keeps its other rows and its scroll
+    /// position. A new sort moves nearly everything: one Reset then. Never Move: the DataGrid's collection view ignores
+    /// Move notifications, so it would keep drawing the old order.
+    /// </summary>
+    private void Reorder()
+    {
+        var target = VisibleTorrents.ToList();
+        target.Sort(_order);
+
+        // The steps needed, worked out on a copy: one row that overtakes the others is one step, even though every row
+        // below it shifts a place.
+        var steps = MoveSteps(VisibleTorrents.ToList(), target);
+        if (steps is { Count: 0 }) return;
+
+        if (steps is null)
+        {
+            VisibleTorrents.ReplaceAll(target);
+        }
+        else
+        {
+            foreach (var (from, to) in steps)
+            {
+                var item = VisibleTorrents[from];
+                VisibleTorrents.RemoveAt(from);
+                VisibleTorrents.Insert(to, item);
+            }
+        }
+
+        _restoreNeeded = true;
+    }
+
+    /// <summary>The remove-and-insert steps that turn <paramref name="current"/> into <paramref name="target"/>, or null
+    /// when there are more than <see cref="MaxSingleMoves"/>.</summary>
+    private static List<(int From, int To)>? MoveSteps(List<TorrentItemViewModel> current, List<TorrentItemViewModel> target)
+    {
+        var steps = new List<(int, int)>();
+        for (var i = 0; i < target.Count; i++)
+        {
+            if (ReferenceEquals(current[i], target[i])) continue;
+            if (steps.Count == MaxSingleMoves) return null;
+
+            var from = i + 1;
+            while (!ReferenceEquals(current[from], target[i])) from++;
+            var item = current[from];
+            current.RemoveAt(from);
+            current.Insert(i, item);
+            steps.Add((from, i));
+        }
+
+        return steps;
     }
 
     private void BeginBatch() => _selectionSyncSuppressed = true;

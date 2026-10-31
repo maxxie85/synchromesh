@@ -1,0 +1,202 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:conv="clr-namespace:Synchro.Desktop.Converters"
+             xmlns:controls="clr-namespace:Synchro.Desktop.Controls"
+             xmlns:sort="clr-namespace:Synchro.Core.Settings;assembly=Synchro.Core"
+             x:Class="Synchro.Desktop.Views.TorrentListView"
+             x:DataType="vm:MainWindowViewModel">
+  <!-- The torrents, as a grid: drag a header's edge to resize a column, click a header to sort by it (again: the
+       other direction). Sorting is the view model's (TorrentListViewModel.Sort), not the grid's own; selection is
+       owned by TorrentListViewModel too. A template column only counts as sortable (and raises Sorting) with a
+       SortMemberPath, so each has one; the grid never uses it, OnSorting handles the click. -->
+  <UserControl.Styles>
+    <!-- Let the header content (SortHeader) choose its own alignment: numbers right, text left. A right-click on a
+         header opens its own menu (column widths) instead of the torrent menu below. -->
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="ContextMenu">
+        <Template>
+          <ContextMenu>
+            <MenuItem Header="Fit this column" Click="OnFitColumnClick" />
+            <MenuItem Header="Fit all columns" Click="OnFitAllColumnsClick" />
+            <Separator />
+            <MenuItem Header="Reset column widths" Click="OnResetColumnWidthsClick" />
+          </ContextMenu>
+        </Template>
+      </Setter>
+    </Style>
+    <!-- Material's rows are 52 px; the list stays as dense as before (about 33 px), so twice as many torrents fit. -->
+    <Style Selector="DataGrid#TorrentGrid DataGridRow">
+      <Setter Property="MinHeight" Value="33" />
+      <Setter Property="Height" Value="33" />
+    </Style>
+    <Style Selector="DataGrid#TorrentGrid DataGridCell">
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Height" Value="33" />
+    </Style>
+    <Style Selector="DataGridCell TextBlock.number">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+  </UserControl.Styles>
+
+  <Panel>
+    <DataGrid x:Name="TorrentGrid" ItemsSource="{Binding TorrentList.VisibleTorrents}"
+              AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended"
+              CanUserResizeColumns="True" CanUserSortColumns="True" CanUserReorderColumns="False"
+              GridLinesVisibility="None" HeadersVisibility="Column" Sorting="OnSorting"
+              RowHeight="33" ColumnHeaderHeight="36" BorderThickness="0">
+      <DataGrid.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Start" Command="{Binding Toolbar.StartCommand}" />
+          <MenuItem Header="Start now" Command="{Binding Toolbar.StartNowCommand}" />
+          <MenuItem Header="Stop" Command="{Binding Toolbar.StopCommand}" />
+          <MenuItem Header="Remove…" Command="{Binding Toolbar.RemoveCommand}" />
+          <Separator />
+          <MenuItem Header="Rename…" Command="{Binding Toolbar.RenameCommand}" />
+          <MenuItem Header="Labels…" Command="{Binding Toolbar.EditLabelsCommand}" />
+          <MenuItem Header="Move data…" Command="{Binding Toolbar.MoveDataCommand}" />
+          <MenuItem Header="Verify local data" Command="{Binding Toolbar.VerifyCommand}" />
+          <MenuItem Header="Ask trackers for more peers" Command="{Binding Toolbar.ReannounceCommand}" />
+          <Separator />
+          <MenuItem Header="Move to top" Command="{Binding Toolbar.MoveToTopCommand}" />
+          <MenuItem Header="Move up" Command="{Binding Toolbar.MoveUpCommand}" />
+          <MenuItem Header="Move down" Command="{Binding Toolbar.MoveDownCommand}" />
+          <MenuItem Header="Move to bottom" Command="{Binding Toolbar.MoveToBottomCommand}" />
+        </ContextMenu>
+      </DataGrid.ContextMenu>
+
+      <DataGrid.Columns>
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Queue}" SortMemberPath="QueueText" Width="52" MinWidth="40">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="#" Column="Queue" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number secondary" Text="{Binding QueueText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Name}" SortMemberPath="Name" Width="*" MinWidth="160">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Name" Column="Name"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <DockPanel HorizontalSpacing="6" VerticalAlignment="Center">
+                <icons:MaterialIcon DockPanel.Dock="Right" Kind="TagOutline" Width="14" Height="14" Opacity="0.6"
+                                    IsVisible="{Binding HasLabels}" ToolTip.Tip="{Binding LabelsText}" />
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+              </DockPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Size}" SortMemberPath="SizeText" Width="84" MinWidth="60">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Size" Column="Size" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number" Text="{Binding SizeText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Progress}" SortMemberPath="Progress" Width="160" MinWidth="90">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Progress" Column="Progress"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                <ProgressBar Classes="status" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                             Classes.downloading="{Binding Status, Converter={x:Static conv:StatusConverters.IsDownloading}}"
+                             Classes.seeding="{Binding Status, Converter={x:Static conv:StatusConverters.IsSeeding}}"
+                             Classes.error="{Binding HasError}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
+                           MinWidth="34" TextAlignment="Right" />
+              </Grid>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Status}" SortMemberPath="StatusText" Width="140" MinWidth="80">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Status" Column="Status"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <DockPanel HorizontalSpacing="6" VerticalAlignment="Center" ToolTip.Tip="{Binding ErrorText}">
+                <icons:MaterialIcon Classes="status" IsVisible="{Binding !HasError}"
+                                    Kind="{Binding Status, Converter={x:Static conv:IconConverters.Status}}"
+                                    Classes.downloading="{Binding Status, Converter={x:Static conv:StatusConverters.IsDownloading}}"
+                                    Classes.seeding="{Binding Status, Converter={x:Static conv:StatusConverters.IsSeeding}}" />
+                <icons:MaterialIcon Classes="status error" Kind="AlertCircleOutline" IsVisible="{Binding HasError}" />
+                <TextBlock Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" Classes.error="{Binding HasError}" />
+              </DockPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Download}" SortMemberPath="DownloadText" Width="96" MinWidth="60">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Down" Column="Download" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number" Text="{Binding DownloadText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Upload}" SortMemberPath="UploadText" Width="96" MinWidth="60">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Up" Column="Upload" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number" Text="{Binding UploadText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Eta}" SortMemberPath="EtaText" Width="96" MinWidth="56">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="ETA" Column="Eta" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number" Text="{Binding EtaText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Ratio}" SortMemberPath="RatioText" Width="72" MinWidth="56">
+          <DataGridTemplateColumn.Header>
+            <controls:SortHeader Text="Ratio" Column="Ratio" IsNumeric="True"
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+          </DataGridTemplateColumn.Header>
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="vm:TorrentItemViewModel">
+              <TextBlock Classes="number" Text="{Binding RatioText}" VerticalAlignment="Center" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <TextBlock Text="{Binding TorrentList.EmptyMessage}" IsVisible="{Binding TorrentList.HasEmptyMessage}"
+               Classes="secondary" HorizontalAlignment="Center" VerticalAlignment="Center" />
+  </Panel>
+</UserControl>

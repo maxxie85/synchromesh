@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:conv="clr-namespace:Synchro.Desktop.Converters"
+             x:Class="Synchro.Desktop.Views.FiltersView"
+             x:DataType="vm:TorrentListViewModel">
+  <!-- Status filters, then labels: together they narrow the torrent list. -->
+  <ScrollViewer>
+    <StackPanel>
+      <ListBox Classes="nav" ItemsSource="{Binding Filters}"
+               SelectedItem="{Binding SelectedFilter}" Margin="0,8">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:FilterItemViewModel">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+              <icons:MaterialIcon Kind="{Binding Filter, Converter={x:Static conv:IconConverters.Filter}}"
+                                  Width="20" Height="20" />
+              <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2" Classes="secondary" Text="{Binding Count}" VerticalAlignment="Center" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <!-- Labels: narrow the list further, together with the status filter above. -->
+      <StackPanel IsVisible="{Binding HasLabels}" Margin="0,0,0,8">
+        <TextBlock Classes="header" Text="LABELS" Margin="24,4,0,4" />
+        <ListBox Classes="nav" ItemsSource="{Binding LabelFilters}"
+                 SelectedItem="{Binding SelectedLabel}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:LabelFilterItemViewModel">
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <icons:MaterialIcon Kind="TagMultipleOutline" Width="20" Height="20" IsVisible="{Binding IsAll}" />
+                <icons:MaterialIcon Kind="TagOutline" Width="20" Height="20" IsVisible="{Binding !IsAll}" />
+                <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Classes="secondary" Text="{Binding Count}" VerticalAlignment="Center" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

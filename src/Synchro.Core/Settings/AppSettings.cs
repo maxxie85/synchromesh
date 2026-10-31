@@ -12,11 +12,16 @@ public enum ThemePreference
 /// <param name="LastServerId">The server connected to last; the app reconnects to it on start.</param>
 /// <param name="LogUiStalls">Help > Log UI stalls, kept on across restarts so it also catches the first moments.</param>
 /// <param name="PasswordStorage">Where server passwords are kept (Settings > Servers).</param>
+/// <param name="ListSort">The torrent list's sort column and direction; null is queue order.</param>
+/// <param name="ListColumnWidths">Widths the user dragged the torrent list's columns to, in pixels; the Name column
+/// isn't in it (it takes the space that's left). Null or missing columns use the default widths.</param>
 public sealed record AppSettings(
     ThemePreference Theme = ThemePreference.System,
     Guid? LastServerId = null,
     bool LogUiStalls = false,
-    Servers.PasswordStorage PasswordStorage = Servers.PasswordStorage.Keyring);
+    Servers.PasswordStorage PasswordStorage = Servers.PasswordStorage.Keyring,
+    TorrentSort? ListSort = null,
+    IReadOnlyDictionary<TorrentSortColumn, double>? ListColumnWidths = null);
 
 public interface IAppSettingsStore
 {

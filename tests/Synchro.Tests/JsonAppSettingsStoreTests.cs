@@ -49,4 +49,27 @@ public sealed class JsonAppSettingsStoreTests : IDisposable
 
         Assert.Equal(new AppSettings(), await new JsonAppSettingsStore(FilePath).LoadAsync());
     }
+
+    [Fact]
+    public async Task Keeps_the_list_sort()
+    {
+        var sort = new TorrentSort(TorrentSortColumn.Download, Descending: true);
+
+        await new JsonAppSettingsStore(FilePath).UpdateAsync(s => s with { ListSort = sort });
+
+        Assert.Equal(sort, (await new JsonAppSettingsStore(FilePath).LoadAsync()).ListSort);
+        Assert.Contains("\"download\"", await File.ReadAllTextAsync(FilePath));
+    }
+
+    [Fact]
+    public async Task Keeps_the_list_column_widths()
+    {
+        var widths = new Dictionary<TorrentSortColumn, double> { [TorrentSortColumn.Size] = 120, [TorrentSortColumn.Eta] = 90 };
+
+        await new JsonAppSettingsStore(FilePath).UpdateAsync(s => s with { ListColumnWidths = widths });
+
+        var loaded = (await new JsonAppSettingsStore(FilePath).LoadAsync()).ListColumnWidths!;
+        Assert.Equal(120, loaded[TorrentSortColumn.Size]);
+        Assert.Equal(90, loaded[TorrentSortColumn.Eta]);
+    }
 }

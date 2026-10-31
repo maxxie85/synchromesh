@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Synchro.ViewModels;assembly=Synchro.ViewModels"
+             x:Class="Synchro.Desktop.Views.StatisticsView"
+             x:DataType="vm:StatisticsViewModel">
+  <!-- Server-wide totals from session_stats: this session and all time. -->
+  <StackPanel Spacing="2" IsVisible="{Binding HasStatistics}">
+    <Grid ColumnDefinitions="*,62,66" ColumnSpacing="6">
+      <TextBlock Classes="header" Text="STATISTICS" />
+      <TextBlock Grid.Column="1" Classes="header number" Text="Session" />
+      <TextBlock Grid.Column="2" Classes="header number" Text="All time" />
+    </Grid>
+    <ItemsControl ItemsSource="{Binding Rows}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:StatisticsRow">
+          <Grid ColumnDefinitions="*,62,66" ColumnSpacing="6" Margin="0,2">
+            <TextBlock Classes="secondary" Text="{Binding Label}" FontSize="12" TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding Label}" />
+            <TextBlock Grid.Column="1" Classes="number" Text="{Binding Current}" FontSize="12" />
+            <TextBlock Grid.Column="2" Classes="number" Text="{Binding Cumulative}" FontSize="12" />
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

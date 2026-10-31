@@ -1,3 +1,4 @@
+using Synchro.Core.Settings;
 using Avalonia.Data.Converters;
 using Material.Icons;
 using Synchro.Core.Torrents;
@@ -35,4 +36,15 @@ public static class StatusConverters
         new(s => s is TorrentStatus.Downloading or TorrentStatus.Verifying);
 
     public static readonly FuncValueConverter<TorrentStatus, bool> IsSeeding = new(s => s == TorrentStatus.Seeding);
+}
+
+/// <summary>The torrent list's column headers: which one is sorted, and the arrow for its direction.</summary>
+public static class SortConverters
+{
+    /// <summary>True for the header of the sorted column (the column is the converter parameter).</summary>
+    public static readonly FuncValueConverter<TorrentSort, TorrentSortColumn, bool> IsColumn =
+        new((sort, column) => sort is not null && sort.Column == column);
+
+    public static readonly FuncValueConverter<TorrentSort, MaterialIconKind> Arrow =
+        new(sort => sort is { Descending: true } ? MaterialIconKind.MenuDown : MaterialIconKind.MenuUp);
 }

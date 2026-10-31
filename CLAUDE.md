@@ -32,6 +32,10 @@ Always build and run the tests after a change. If your tooling does not open `.s
 - Synchro.AppServices: connection state, polling, actions, the fallback password file. (Not named "Application": that namespace would shadow Avalonia's `Application`.)
 - Synchro.ViewModels: no Avalonia reference. Everything here must stay unit-testable.
 - Synchro.Desktop: views, dialog service, `CompositionRoot`. The only place that knows the DI container.
+  `MainWindow` only holds the menus, window shortcuts, drag and drop and the layout; each panel is a UserControl
+  bound to its own view model (`StatusBarView`, `StorageView`, `StatisticsView`, `SpeedHistoryView`, `FiltersView`,
+  `TorrentDetailsView`); panels that need several view models (`ToolbarView`, `TorrentListView`, `SidebarView`) get
+  `MainWindowViewModel`. View-only code (selection sync, flyout closing, focus) lives in the panel's code-behind.
 - Platform-specific code lives in Synchro.Platform.* behind Core interfaces (`ICredentialStore`, `INotifier`). Only
   `CompositionRoot` and `Program` know platforms: `Synchro.Platform.Windows` targets `net10.0-windows10.0.19041.0` (toasts
   via the Windows SDK projections), so `Synchro.Desktop` switches to that TFM and references it only for `win-*` runtime
@@ -132,6 +136,9 @@ Regenerate after visible UI changes.
   `Choice<T>`.
 - Hiding a Flyout from a button's Click detaches the button, which clears its command before it runs: post the hide
   with `Dispatcher.UIThread.Post`.
+- The DataGrid's collection view ignores `ObservableCollection.Move`: rows keep their old place on screen. Reorder
+  with RemoveAt + Insert, or `BulkObservableCollection.ReplaceAll` (one Reset) when many rows move. A headless check
+  of the order must read the drawn `DataGridRow`s, not the source collection.
 
 ## CI and releases
 
@@ -162,7 +169,28 @@ change it, then what is still open.
 ### Features and how they work
 
 - **Torrent list:** delta polling (see Protocol facts), filters by status combined with labels, search, queue order,
-  start/stop/remove, verify and re-announce (Torrent and right-click menus).
+  start/stop/remove, verify and re-announce (Torrent and right-click menus). Sorting by a column header
+  (`TorrentListViewModel.Sort`/`SortByCommand`, `TorrentSorting`: amounts start descending, unknown ETA/ratio last
+  in both directions, ties by queue order; status grouped errors → active → waiting → paused → finished). After each
+  poll `Reorder()` fixes only out-of-place rows (remove + insert; above `MaxSingleMoves` one Reset via
+  `BulkObservableCollection.ReplaceAll`) instead of rebuilding, and asks the view to restore the selection. Saved as `AppSettings.ListSort` (null = queue order) by `MainWindowViewModel`.
+  The list is an Avalonia `DataGrid` (`TorrentListView`, packages `Avalonia.Controls.DataGrid` +
+  `Material.Avalonia.DataGrid`, styles via `MaterialDataGridStyles` in App.axaml): template columns tagged with their
+  `TorrentSortColumn`; the grid's `Sorting` event is handled (marked handled) and calls `SortByCommand`, so the grid
+  never sorts itself. A template column raises `Sorting` only with a `SortMemberPath` (unused, but required; without
+  it a header click does nothing; `TorrentListViewMarkupTests` checks every column has one); `Controls/SortHeader` draws title and arrow (the grid has no public sort direction). Material's
+  52 px rows are overridden to 33 px (`DataGridRow`/`DataGridCell` Height in the view's styles; `RowHeight` alone
+  doesn't win). Resizable columns; widths except Name (star) saved as `AppSettings.ListColumnWidths` when the window
+  closes (`MainWindowViewModel.SaveColumnWidthsAsync`, blocking but the store doesn't need the UI thread) and applied
+  when `ColumnWidths` arrives at start-up. Double-clicking a header separator (within 6 px of an edge; the left edge
+  means the previous column) fits that column, Name included (it then gets a fixed width, saved like the others):
+  `FitToContent` measures the header and the realised cells under it (found by X position) with
+  `Measure(Size.Infinity)` plus the cell padding. Don't use `DataGridLength.Auto` for this: it measures cells at the
+  current width, where "…"-trimmed text already fits, so the column hardly grows. A right-click on a header opens
+  the header's own menu (set on `DataGridColumnHeader` by a style `<Template>`, so it wins over the grid's torrent
+  menu): Fit this column (the header is the menu's logical ancestor), Fit all columns, Reset column widths (the XAML
+  widths, kept at construction; Name is star again). The header doesn't expose its column: it's found by `column.Header == header.Content`. Header
+  clicks can be tested headlessly (`window.MouseDown/MouseUp`, twice for a double-click).
 - **Details panel** for the one selected torrent, via `ITorrentDetailsFeed.Watch(hash)`: one extra `torrent_get` per
   poll; `files`/`file_stats` only while the Files tab shows. Tabs: General; Trackers (Add trackers… gives each new
   address its own tier; remove asks first); Peers; Files (wanted, priority, right-click Rename…; no menu in the Add
