@@ -58,7 +58,7 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         _connection.StatusChanged += OnConnectionStatusChanged;
     }
 
-    public ObservableCollection<TorrentItemViewModel> VisibleTorrents { get; } = [];
+    public BulkObservableCollection<TorrentItemViewModel> VisibleTorrents { get; } = [];
     public IReadOnlyList<FilterItemViewModel> Filters { get; }
 
     /// <summary>The selected, still visible torrents in queue order.</summary>
@@ -331,27 +331,61 @@ public sealed partial class TorrentListViewModel : ObservableObject, IDisposable
         _restoreNeeded = true;
     }
 
+    /// <summary>A reorder with more rows out of place than this resets the list in one go instead of row by row.</summary>
+    internal const int MaxSingleMoves = 16;
+
     /// <summary>
-    /// Brings the visible rows into <see cref="Sort"/> order by moving only the rows that are out of place, so the list
-    /// keeps its rows (and scroll position) instead of being rebuilt every poll.
+    /// Brings the visible rows into <see cref="Sort"/> order. After a poll usually only a few rows are out of place
+    /// (a speed changed): those are removed and inserted again, so the list keeps its other rows and its scroll
+    /// position. A new sort moves nearly everything: one Reset then. Never Move: the DataGrid's collection view ignores
+    /// Move notifications, so it would keep drawing the old order.
     /// </summary>
     private void Reorder()
     {
         var target = VisibleTorrents.ToList();
         target.Sort(_order);
 
-        var moved = false;
-        for (var i = 0; i < target.Count; i++)
-        {
-            if (ReferenceEquals(VisibleTorrents[i], target[i])) continue;
+        // The steps needed, worked out on a copy: one row that overtakes the others is one step, even though every row
+        // below it shifts a place.
+        var steps = MoveSteps(VisibleTorrents.ToList(), target);
+        if (steps is { Count: 0 }) return;
 
-            var from = i + 1;
-            while (!ReferenceEquals(VisibleTorrents[from], target[i])) from++;
-            VisibleTorrents.Move(from, i);
-            moved = true;
+        if (steps is null)
+        {
+            VisibleTorrents.ReplaceAll(target);
+        }
+        else
+        {
+            foreach (var (from, to) in steps)
+            {
+                var item = VisibleTorrents[from];
+                VisibleTorrents.RemoveAt(from);
+                VisibleTorrents.Insert(to, item);
+            }
         }
 
-        if (moved) _restoreNeeded = true;
+        _restoreNeeded = true;
+    }
+
+    /// <summary>The remove-and-insert steps that turn <paramref name="current"/> into <paramref name="target"/>, or null
+    /// when there are more than <see cref="MaxSingleMoves"/>.</summary>
+    private static List<(int From, int To)>? MoveSteps(List<TorrentItemViewModel> current, List<TorrentItemViewModel> target)
+    {
+        var steps = new List<(int, int)>();
+        for (var i = 0; i < target.Count; i++)
+        {
+            if (ReferenceEquals(current[i], target[i])) continue;
+            if (steps.Count == MaxSingleMoves) return null;
+
+            var from = i + 1;
+            while (!ReferenceEquals(current[from], target[i])) from++;
+            var item = current[from];
+            current.RemoveAt(from);
+            current.Insert(i, item);
+            steps.Add((from, i));
+        }
+
+        return steps;
     }
 
     private void BeginBatch() => _selectionSyncSuppressed = true;

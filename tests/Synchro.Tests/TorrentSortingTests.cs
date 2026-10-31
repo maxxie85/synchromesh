@@ -168,4 +168,27 @@ public class TorrentSortingTests
         Assert.True(vm.IsSelected("a"));
         Assert.Equal("a", Assert.Single(vm.SelectedTorrents).Hash);
     }
+
+    [Fact]
+    public void Reordering_never_uses_move_which_the_grid_ignores()
+    {
+        var vm = Create();
+        var torrents = Enumerable.Range(0, 40)
+            .Select(i => MakeTorrent($"h{i:D2}", i + 1, name: $"Torrent {i:D2}", queue: i) with { RateDownload = i }).ToArray();
+        Publish(Full(torrents));
+        var actions = new List<System.Collections.Specialized.NotifyCollectionChangedAction>();
+        vm.VisibleTorrents.CollectionChanged += (_, e) => actions.Add(e.Action);
+
+        // A new sort turns the whole list around: one reset.
+        vm.SortByCommand.Execute(TorrentSortColumn.Download);
+        Assert.Equal([System.Collections.Specialized.NotifyCollectionChangedAction.Reset], actions);
+        Assert.Equal("h39", vm.VisibleTorrents[0].Hash);
+
+        // A poll where one row overtakes the others: that row is removed and inserted again.
+        actions.Clear();
+        Publish(Delta([torrents[0] with { RateDownload = 1000 }]));
+        Assert.Equal("h00", vm.VisibleTorrents[0].Hash);
+        Assert.Equal([System.Collections.Specialized.NotifyCollectionChangedAction.Remove,
+            System.Collections.Specialized.NotifyCollectionChangedAction.Add], actions);
+    }
 }

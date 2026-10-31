@@ -13,7 +13,8 @@ About > License texts, and next to the app in both installers).
 | Component | License | Notes |
 |---|---|---|
 | Avalonia 12.1.4 (+ Native, Skia, HarfBuzz, Win32, X11, FreeDesktop, Remote.Protocol) | MIT | |
-| Material.Avalonia 3.21.0 | MIT | Embeds the **Roboto** font: Apache 2.0 |
+| Avalonia.Controls.DataGrid 12.1.2 | MIT | The torrent list (separate repository, same project and license as Avalonia) |
+| Material.Avalonia 3.21.0 (+ Material.Avalonia.DataGrid) | MIT | Embeds the **Roboto** font: Apache 2.0 |
 | Material.Icons / Material.Icons.Avalonia 3.0.2 | MIT | Icon artwork from Material Design Icons (Pictogrammers): Apache 2.0 |
 | CommunityToolkit.Mvvm 8.4.2 | MIT | |
 | Simple Injector 5.6.0 | MIT | |

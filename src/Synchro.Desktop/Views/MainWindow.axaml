@@ -119,7 +119,7 @@
 
       <!-- List on top, details of the selected torrent below; the splitter resizes the two. -->
       <Grid Grid.Column="1" RowDefinitions="*,Auto,300" MinHeight="0">
-        <views:TorrentListView />
+        <views:TorrentListView x:Name="TorrentListPanel" />
 
         <GridSplitter Grid.Row="1" Height="1" ResizeDirection="Rows"
                       Background="{DynamicResource MaterialDividerBrush}" />

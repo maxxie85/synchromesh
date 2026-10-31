@@ -51,6 +51,7 @@ public sealed partial class MainWindowViewModel(
 
             // The sort chosen last time, before any rows arrive; then remember every change.
             TorrentList.Sort = appSettings.ListSort ?? TorrentSort.Default;
+            ColumnWidths = appSettings.ListColumnWidths;
             TorrentList.PropertyChanged += OnTorrentListPropertyChanged;
 
             var profile = saved.FirstOrDefault(p => p.Id == lastServerId)
@@ -65,6 +66,25 @@ public sealed partial class MainWindowViewModel(
         finally
         {
             externalAdds.Start();
+        }
+    }
+
+    /// <summary>The torrent list's saved column widths, for the view to apply once the settings are read.</summary>
+    [ObservableProperty] private IReadOnlyDictionary<TorrentSortColumn, double>? _columnWidths;
+
+    /// <summary>
+    /// Remembers the list's column widths (when the window closes). Waits for the write, so the app can quit right
+    /// after; a failure only means the default widths next time.
+    /// </summary>
+    public async Task SaveColumnWidthsAsync(IReadOnlyDictionary<TorrentSortColumn, double> widths)
+    {
+        try
+        {
+            await settings.UpdateAsync(s => s with { ListColumnWidths = widths.Count == 0 ? null : widths })
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
         }
     }
 

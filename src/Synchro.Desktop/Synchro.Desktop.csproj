@@ -34,6 +34,8 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Material.Avalonia" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Material.Avalonia.DataGrid" />
     <PackageReference Include="Material.Icons.Avalonia" />
     <PackageReference Include="SimpleInjector" />
   </ItemGroup>

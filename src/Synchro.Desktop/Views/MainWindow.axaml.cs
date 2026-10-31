@@ -17,6 +17,14 @@ public partial class MainWindow : Window
         AddHandler(DragDrop.DragOverEvent, OnDragOver);
         AddHandler(DragDrop.DropEvent, OnDrop);
 
+        // Remember the list's column widths. Waits for the small write (the store doesn't need the UI thread), so
+        // they're saved even when the app quits right after.
+        Closing += (_, _) =>
+        {
+            if (DataContext is MainWindowViewModel vm)
+                vm.SaveColumnWidthsAsync(TorrentListPanel.CurrentColumnWidths()).GetAwaiter().GetResult();
+        };
+
         // Start-up work needs the window to exist (first run opens a dialog on top of it).
         Opened += async (_, _) =>
         {

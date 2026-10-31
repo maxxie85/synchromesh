@@ -154,4 +154,22 @@ public class MainWindowViewModelTests
         vm.TorrentList.Sort = Synchro.Core.Settings.TorrentSort.Default;
         Assert.Null(saved.ListSort); // queue order is the default, nothing to remember
     }
+
+    [Fact]
+    public async Task Column_widths_are_handed_to_the_view_on_start_and_saved()
+    {
+        var widths = new Dictionary<Synchro.Core.Settings.TorrentSortColumn, double> { [Synchro.Core.Settings.TorrentSortColumn.Size] = 120 };
+        var saved = new AppSettings(ListColumnWidths: widths);
+        _settings.LoadAsync(Arg.Any<CancellationToken>()).Returns(_ => saved);
+        _settings.UpdateAsync(Arg.Any<Func<AppSettings, AppSettings>>(), Arg.Any<CancellationToken>())
+            .Returns(call => saved = call.Arg<Func<AppSettings, AppSettings>>()(saved));
+        _profiles.LoadAsync(Arg.Any<CancellationToken>()).Returns(new[] { _profile });
+        var vm = Create();
+
+        await vm.InitializeCommand.ExecuteAsync(null);
+        Assert.Equal(120, vm.ColumnWidths![Synchro.Core.Settings.TorrentSortColumn.Size]);
+
+        await vm.SaveColumnWidthsAsync(new Dictionary<Synchro.Core.Settings.TorrentSortColumn, double> { [Synchro.Core.Settings.TorrentSortColumn.Eta] = 90 });
+        Assert.Equal(90, saved.ListColumnWidths![Synchro.Core.Settings.TorrentSortColumn.Eta]);
+    }
 }

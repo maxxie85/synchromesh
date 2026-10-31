@@ -50,7 +50,7 @@ foreach (var (variant, suffix) in new[] { (ThemeVariant.Light, "light"), (ThemeV
     container.GetInstance<SpeedHistoryViewModel>().Seed(DemoServer.SpeedHistory());
     Pump(TimeSpan.FromSeconds(5));
 
-    var list = window.GetVisualDescendants().OfType<ListBox>().First(l => l.Name == "TorrentListBox");
+    var list = window.GetVisualDescendants().OfType<DataGrid>().First(l => l.Name == "TorrentGrid");
     list.SelectedItem = main.TorrentList.VisibleTorrents.First(t => t.Name == DemoServer.Featured);
     Pump(TimeSpan.FromSeconds(3));
     Save(window, "main", suffix);
