@@ -46,7 +46,13 @@ public sealed partial class MainWindowViewModel(
         try
         {
             var saved = await profiles.LoadAsync(ct);
-            var lastServerId = (await settings.LoadAsync(ct)).LastServerId;
+            var appSettings = await settings.LoadAsync(ct);
+            var lastServerId = appSettings.LastServerId;
+
+            // The sort chosen last time, before any rows arrive; then remember every change.
+            TorrentList.Sort = appSettings.ListSort ?? TorrentSort.Default;
+            TorrentList.PropertyChanged += OnTorrentListPropertyChanged;
+
             var profile = saved.FirstOrDefault(p => p.Id == lastServerId)
                           ?? saved.FirstOrDefault()
                           ?? await dialogs.ShowServerSetupAsync(null, ct);
@@ -59,6 +65,21 @@ public sealed partial class MainWindowViewModel(
         finally
         {
             externalAdds.Start();
+        }
+    }
+
+    private async void OnTorrentListPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(TorrentListViewModel.Sort)) return;
+
+        var sort = TorrentList.Sort;
+        try
+        {
+            await settings.UpdateAsync(s => s with { ListSort = sort == TorrentSort.Default ? null : sort });
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The list is sorted anyway; it just won't be remembered for the next start.
         }
     }
 

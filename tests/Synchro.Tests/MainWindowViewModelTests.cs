@@ -134,4 +134,24 @@ public class MainWindowViewModelTests
 
         _externalAdds.Received(1).Start();
     }
+
+    [Fact]
+    public async Task The_list_sort_is_restored_on_start_and_remembered()
+    {
+        var saved = new AppSettings(ListSort: new Synchro.Core.Settings.TorrentSort(Synchro.Core.Settings.TorrentSortColumn.Name, true));
+        _settings.LoadAsync(Arg.Any<CancellationToken>()).Returns(saved);
+        _settings.UpdateAsync(Arg.Any<Func<AppSettings, AppSettings>>(), Arg.Any<CancellationToken>())
+            .Returns(call => saved = call.Arg<Func<AppSettings, AppSettings>>()(saved));
+        _profiles.LoadAsync(Arg.Any<CancellationToken>()).Returns(new[] { _profile });
+        var vm = Create();
+
+        await vm.InitializeCommand.ExecuteAsync(null);
+        Assert.Equal(new Synchro.Core.Settings.TorrentSort(Synchro.Core.Settings.TorrentSortColumn.Name, true), vm.TorrentList.Sort);
+
+        vm.TorrentList.SortByCommand.Execute(Synchro.Core.Settings.TorrentSortColumn.Size);
+        Assert.Equal(new Synchro.Core.Settings.TorrentSort(Synchro.Core.Settings.TorrentSortColumn.Size, true), saved.ListSort);
+
+        vm.TorrentList.Sort = Synchro.Core.Settings.TorrentSort.Default;
+        Assert.Null(saved.ListSort); // queue order is the default, nothing to remember
+    }
 }

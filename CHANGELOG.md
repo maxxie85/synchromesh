@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Sort the torrent list by clicking a column header: number, name, size, progress, status, speeds, ETA or ratio.
+  Click it again to reverse the order. Sizes, progress, speeds and ratio start with the biggest first; an unknown
+  ETA or ratio always comes last. Synchromesh remembers the sort for the next start.
+
 ## [1.0.2] - 2026-10-24
 
 ### Fixed

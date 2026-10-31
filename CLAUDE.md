@@ -162,7 +162,12 @@ change it, then what is still open.
 ### Features and how they work
 
 - **Torrent list:** delta polling (see Protocol facts), filters by status combined with labels, search, queue order,
-  start/stop/remove, verify and re-announce (Torrent and right-click menus).
+  start/stop/remove, verify and re-announce (Torrent and right-click menus). Sorting by a column header
+  (`TorrentListViewModel.Sort`/`SortByCommand`, `TorrentSorting`: amounts start descending, unknown ETA/ratio last
+  in both directions, ties by queue order; status grouped errors → active → waiting → paused → finished). After each
+  poll `Reorder()` moves only out-of-place rows (`ObservableCollection.Move`) instead of rebuilding, and asks the view
+  to restore the selection. Saved as `AppSettings.ListSort` (null = queue order) by `MainWindowViewModel`. Headers
+  use the `SortHeaderButton` control theme (AppStyles) and `SortConverters` for the arrow.
 - **Details panel** for the one selected torrent, via `ITorrentDetailsFeed.Watch(hash)`: one extra `torrent_get` per
   poll; `files`/`file_stats` only while the Files tab shows. Tabs: General; Trackers (Add trackers… gives each new
   address its own tier; remove asks first); Peers; Files (wanted, priority, right-click Rename…; no menu in the Add
