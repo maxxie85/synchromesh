@@ -15,13 +15,17 @@ public enum ThemePreference
 /// <param name="ListSort">The torrent list's sort column and direction; null is queue order.</param>
 /// <param name="ListColumnWidths">Widths the user dragged the torrent list's columns to, in pixels; the Name column
 /// isn't in it (it takes the space that's left). Null or missing columns use the default widths.</param>
+/// <param name="TableSorts">The details tables' sorts (trackers, peers, files), by table key.</param>
+/// <param name="TableColumnWidths">The details tables' column widths, by table key, then column key.</param>
 public sealed record AppSettings(
     ThemePreference Theme = ThemePreference.System,
     Guid? LastServerId = null,
     bool LogUiStalls = false,
     Servers.PasswordStorage PasswordStorage = Servers.PasswordStorage.Keyring,
     TorrentSort? ListSort = null,
-    IReadOnlyDictionary<TorrentSortColumn, double>? ListColumnWidths = null);
+    IReadOnlyDictionary<TorrentSortColumn, double>? ListColumnWidths = null,
+    IReadOnlyDictionary<string, TableSort>? TableSorts = null,
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>>? TableColumnWidths = null);
 
 public interface IAppSettingsStore
 {

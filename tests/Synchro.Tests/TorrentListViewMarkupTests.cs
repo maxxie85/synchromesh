@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using Synchro.Core.Settings;
+using Synchro.ViewModels.Details;
 using Xunit;
 
 namespace Synchro.Tests;
@@ -12,18 +13,34 @@ public class TorrentListViewMarkupTests
 {
     private static readonly XNamespace Avalonia = "https://github.com/avaloniaui";
 
-    private static XElement[] Columns()
+    private static XElement[] Columns(string view = "TorrentListView")
     {
-        var path = Path.Combine(RepositoryRoot(), "src/Synchro.Desktop/Views/TorrentListView.axaml");
+        var path = Path.Combine(RepositoryRoot(), $"src/Synchro.Desktop/Views/{view}.axaml");
         return XDocument.Load(path).Descendants(Avalonia + "DataGridTemplateColumn").ToArray();
     }
 
-    [Fact]
-    public void Every_column_can_be_clicked_to_sort()
+    [Theory]
+    [InlineData("TorrentListView")]
+    [InlineData("TorrentDetailsView")]
+    [InlineData("FileTreeView")]
+    public void Every_sortable_column_can_be_clicked_to_sort(string view)
     {
-        foreach (var column in Columns())
+        // Columns without a key (the remove button, the lock icon) don't sort.
+        foreach (var column in Columns(view).Where(c => c.Attribute("Tag") is not null))
             Assert.False(string.IsNullOrEmpty((string?)column.Attribute("SortMemberPath")),
-                $"Column {(string?)column.Attribute("Tag")} needs a SortMemberPath, or its header click never sorts.");
+                $"{view}: column {(string?)column.Attribute("Tag")} needs a SortMemberPath, or its header click never sorts.");
+    }
+
+    [Fact]
+    public void Every_detail_column_key_is_one_the_view_models_sort_by()
+    {
+        string[] keys = [.. typeof(TrackerItemViewModel.Columns).GetFields().Select(f => (string)f.GetValue(null)!),
+            .. typeof(PeerItemViewModel.Columns).GetFields().Select(f => (string)f.GetValue(null)!),
+            .. typeof(FilesViewModel.Columns).GetFields().Select(f => (string)f.GetValue(null)!)];
+
+        foreach (var view in new[] { "TorrentDetailsView", "FileTreeView" })
+            foreach (var tag in Columns(view).Select(c => (string?)c.Attribute("Tag")).OfType<string>())
+                Assert.Contains(tag, keys);
     }
 
     [Fact]

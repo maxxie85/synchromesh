@@ -239,4 +239,34 @@
   <Style Selector="Ellipse.dot.error">
     <Setter Property="Fill" Value="{DynamicResource MaterialValidationErrorBrush}" />
   </Style>
+
+  <!-- Tables (the torrent list, trackers, peers, files): DataGrid with Classes="table". Material's rows are 52 px;
+       ours stay dense (33 px), so twice as many rows fit. Headers let their content (SortHeader) choose its own
+       alignment, numbers right. Columns, sorting, fitting and the header menu come from Controls/GridColumns. -->
+  <Style Selector="DataGrid.table">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="RowHeight" Value="33" />
+    <Setter Property="ColumnHeaderHeight" Value="36" />
+    <Setter Property="GridLinesVisibility" Value="None" />
+    <Setter Property="HeadersVisibility" Value="Column" />
+    <Setter Property="AutoGenerateColumns" Value="False" />
+    <Setter Property="IsReadOnly" Value="True" />
+    <Setter Property="CanUserResizeColumns" Value="True" />
+    <Setter Property="CanUserSortColumns" Value="True" />
+    <Setter Property="CanUserReorderColumns" Value="False" />
+  </Style>
+  <Style Selector="DataGrid.table DataGridColumnHeader">
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="DataGrid.table DataGridRow">
+    <Setter Property="MinHeight" Value="33" />
+    <Setter Property="Height" Value="33" />
+  </Style>
+  <Style Selector="DataGrid.table DataGridCell">
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Height" Value="33" />
+  </Style>
+  <Style Selector="DataGrid.table DataGridCell TextBlock.number">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+  </Style>
 </Styles>

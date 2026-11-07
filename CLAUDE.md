@@ -192,7 +192,18 @@ change it, then what is still open.
   widths, kept at construction; Name is star again). The header doesn't expose its column: it's found by `column.Header == header.Content`. Header
   clicks can be tested headlessly (`window.MouseDown/MouseUp`, twice for a double-click).
 - **Details panel** for the one selected torrent, via `ITorrentDetailsFeed.Watch(hash)`: one extra `torrent_get` per
-  poll; `files`/`file_stats` only while the Files tab shows. Tabs: General; Trackers (Add trackers… gives each new
+  poll; `files`/`file_stats` only while the Files tab shows. Trackers, Peers and Files are DataGrids with the same
+  behaviour as the torrent list (`DataGrid.table` style in AppStyles, `Controls/GridColumns` for sort clicks, fit,
+  header menu and widths, `SortHeader` bound to a `TableSort`). Sorting is the view models' (`TableSort` keyed by
+  the column `Tag`; `TrackerItemViewModel`/`PeerItemViewModel`/`FilesViewModel.Columns`, `Order(...)`,
+  `TableSorting`): rows are kept by key and put in order with `RowOrder.Apply` (remove + insert, one Reset past
+  `MaxSteps`, never Move). Defaults: trackers by tier, peers fastest download first, files by name. Tracker edits
+  send each tier in tracker-id order, whatever the table shows. Files is a tree in the grid (TreeDataGrid for
+  Avalonia 12 needs a paid Avalonia licence, so not used): `Rows` are the visible nodes, the Name column draws
+  indent, arrow and checkbox, each folder's contents are sorted with folders first; Rename is a per-row menu
+  (`LoadingRow`), only where renaming works; Done/Progress columns hide in the Add dialog (code-behind, columns
+  can't bind). Sorts saved as `AppSettings.TableSorts` and widths as `TableColumnWidths` (keys trackers, peers,
+  files), restored by `MainWindowViewModel`, widths collected by `TorrentDetailsView` when the window closes. Tabs: General; Trackers (Add trackers… gives each new
   address its own tier; remove asks first); Peers; Files (wanted, priority, right-click Rename…; no menu in the Add
   dialog); Options (limits, priority, peers, seeding by ratio/idle, sequential download; Apply/Revert so the 2 s
   details poll never overwrites edits).

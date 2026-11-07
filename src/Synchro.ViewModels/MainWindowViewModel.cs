@@ -52,6 +52,7 @@ public sealed partial class MainWindowViewModel(
             // The sort chosen last time, before any rows arrive; then remember every change.
             TorrentList.Sort = appSettings.ListSort ?? TorrentSort.Default;
             ColumnWidths = appSettings.ListColumnWidths;
+            RestoreDetailTables(appSettings);
             TorrentList.PropertyChanged += OnTorrentListPropertyChanged;
 
             var profile = saved.FirstOrDefault(p => p.Id == lastServerId)
@@ -66,6 +67,56 @@ public sealed partial class MainWindowViewModel(
         finally
         {
             externalAdds.Start();
+        }
+    }
+
+    // The details tables' sorts and widths from last time; then remember every sort change.
+    private void RestoreDetailTables(AppSettings saved)
+    {
+        var sorts = saved.TableSorts;
+        Details.TrackerSort = sorts?.GetValueOrDefault(TorrentDetailsViewModel.Tables.Trackers) ?? TrackerItemViewModel.DefaultSort;
+        Details.PeerSort = sorts?.GetValueOrDefault(TorrentDetailsViewModel.Tables.Peers) ?? PeerItemViewModel.DefaultSort;
+        Details.Files.Sort = sorts?.GetValueOrDefault(TorrentDetailsViewModel.Tables.Files) ?? FilesViewModel.DefaultSort;
+        Details.ColumnWidths = saved.TableColumnWidths;
+
+        Details.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(TorrentDetailsViewModel.TrackerSort) or nameof(TorrentDetailsViewModel.PeerSort))
+                SaveTableSorts();
+        };
+        Details.Files.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(FilesViewModel.Sort)) SaveTableSorts();
+        };
+    }
+
+    private async void SaveTableSorts()
+    {
+        var sorts = new Dictionary<string, TableSort>
+        {
+            [TorrentDetailsViewModel.Tables.Trackers] = Details.TrackerSort,
+            [TorrentDetailsViewModel.Tables.Peers] = Details.PeerSort,
+            [TorrentDetailsViewModel.Tables.Files] = Details.Files.Sort,
+        };
+        try
+        {
+            await settings.UpdateAsync(s => s with { TableSorts = sorts });
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Sorted anyway; just not remembered.
+        }
+    }
+
+    /// <summary>Remembers the details tables' column widths (by table key) when the window closes; see <see cref="SaveColumnWidthsAsync"/>.</summary>
+    public async Task SaveTableColumnWidthsAsync(IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>> widths)
+    {
+        try
+        {
+            await settings.UpdateAsync(s => s with { TableColumnWidths = widths }).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
         }
     }
 

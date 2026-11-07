@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Synchro.AppServices.Torrents;
+using Synchro.Core.Settings;
 using Synchro.Core.Torrents;
 using Synchro.ViewModels.Services;
 
@@ -56,7 +58,33 @@ public sealed partial class FilesViewModel : ObservableObject
     public bool NothingWanted => WantedCount == 0 && _byIndex.Count > 0;
 
     /// <summary>The visible rows: top-level nodes and the children of expanded folders, in tree order.</summary>
-    public ObservableCollection<FileNodeViewModel> Rows { get; } = [];
+    public BulkObservableCollection<FileNodeViewModel> Rows { get; } = [];
+
+    /// <summary>Column keys, as the view's columns are tagged.</summary>
+    public static class Columns
+    {
+        public const string Name = "Name", Size = "Size", Done = "Done", Progress = "Progress", Priority = "Priority";
+    }
+
+    /// <summary>Folders first, names A to Z (natural order: 2 before 10), like the Finder.</summary>
+    public static TableSort DefaultSort { get; } = new(Columns.Name, false);
+
+    /// <summary>
+    /// How each folder's contents are ordered; folders always come before files, so the tree stays readable. Set from
+    /// the saved settings at start-up.
+    /// </summary>
+    [ObservableProperty] private TableSort _sort = DefaultSort;
+
+    /// <summary>A click on a column header (its key): that column, or the other direction.</summary>
+    [RelayCommand]
+    private void SortBy(string column) => Sort = TableSorting.Toggle(Sort, column,
+        c => c is Columns.Size or Columns.Done or Columns.Progress or Columns.Priority);
+
+    partial void OnSortChanged(TableSort value)
+    {
+        SortTree(_roots);
+        RefreshRows();
+    }
 
     [ObservableProperty] private bool _hasFiles;
     [ObservableProperty] private int _fileCount;
@@ -93,6 +121,10 @@ public sealed partial class FilesViewModel : ObservableObject
         foreach (var root in _roots.Where(r => r.IsFolder))
             root.Aggregate();
 
+        // Done, progress and priority change between polls.
+        SortTree(_roots);
+        RefreshRows();
+
         HasFiles = files.Count > 0;
         FileCount = files.Count;
         UpdateSummary();
@@ -119,11 +151,7 @@ public sealed partial class FilesViewModel : ObservableObject
         }
         _roots.ForEach(Add);
 
-        if (visible.SequenceEqual(Rows)) return;
-
-        Rows.Clear();
-        foreach (var node in visible)
-            Rows.Add(node);
+        RowOrder.Apply(Rows, visible);
     }
 
     internal async void RequestWanted(FileNodeViewModel node, bool wanted)
@@ -226,7 +254,7 @@ public sealed partial class FilesViewModel : ObservableObject
             _byIndex[files[i].Index] = leaf;
         }
 
-        Sort(_roots);
+        SortTree(_roots);
 
         // One folder at the top: open it, there is nothing else to see.
         if (_roots is [{ IsFolder: true } only])
@@ -235,13 +263,28 @@ public sealed partial class FilesViewModel : ObservableObject
         RefreshRows();
     }
 
-    // Folders first, then names in natural order (2 before 10), like Finder.
-    private static void Sort(List<FileNodeViewModel> nodes)
+    private void SortTree(List<FileNodeViewModel> nodes)
     {
-        nodes.Sort((a, b) => a.IsFolder != b.IsFolder
-            ? (a.IsFolder ? -1 : 1)
-            : Formatting.NaturalStringComparer.Instance.Compare(a.Name, b.Name));
-        foreach (var n in nodes.Where(n => n.IsFolder))
-            Sort(n.Children);
+        var byColumn = TableSorting.Comparison<FileNodeViewModel>(Sort, column => column switch
+            {
+                Columns.Name => (a, b) => Formatting.NaturalStringComparer.Instance.Compare(a.Name, b.Name),
+                Columns.Size => (a, b) => a.Length.CompareTo(b.Length),
+                Columns.Done => (a, b) => a.BytesCompleted.CompareTo(b.BytesCompleted),
+                Columns.Progress => (a, b) => a.Progress.CompareTo(b.Progress),
+                // High before low when descending; a folder with mixed priorities sorts last either way.
+                Columns.Priority => (a, b) => TableSorting.KnownFirst(a.Priority is not null, b.Priority is not null,
+                    Sort.Descending, () => a.Priority!.Value.CompareTo(b.Priority!.Value)),
+                _ => null,
+            },
+            (a, b) => Formatting.NaturalStringComparer.Instance.Compare(a.Name, b.Name));
+        Comparison<FileNodeViewModel> order = (a, b) => a.IsFolder != b.IsFolder ? (a.IsFolder ? -1 : 1) : byColumn(a, b);
+
+        void SortLevel(List<FileNodeViewModel> level)
+        {
+            level.Sort(order);
+            foreach (var folder in level.Where(n => n.IsFolder))
+                SortLevel(folder.Children);
+        }
+        SortLevel(nodes);
     }
 }

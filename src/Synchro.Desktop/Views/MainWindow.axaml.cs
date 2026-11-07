@@ -21,8 +21,9 @@ public partial class MainWindow : Window
         // they're saved even when the app quits right after.
         Closing += (_, _) =>
         {
-            if (DataContext is MainWindowViewModel vm)
-                vm.SaveColumnWidthsAsync(TorrentListPanel.CurrentColumnWidths()).GetAwaiter().GetResult();
+            if (DataContext is not MainWindowViewModel vm) return;
+            vm.SaveColumnWidthsAsync(TorrentListPanel.CurrentColumnWidths()).GetAwaiter().GetResult();
+            vm.SaveTableColumnWidthsAsync(DetailsPanel.CurrentColumnWidths()).GetAwaiter().GetResult();
         };
 
         // Start-up work needs the window to exist (first run opens a dialog on top of it).

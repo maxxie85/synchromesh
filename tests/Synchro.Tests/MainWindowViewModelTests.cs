@@ -172,4 +172,28 @@ public class MainWindowViewModelTests
         await vm.SaveColumnWidthsAsync(new Dictionary<Synchro.Core.Settings.TorrentSortColumn, double> { [Synchro.Core.Settings.TorrentSortColumn.Eta] = 90 });
         Assert.Equal(90, saved.ListColumnWidths![Synchro.Core.Settings.TorrentSortColumn.Eta]);
     }
+
+    [Fact]
+    public async Task The_detail_tables_sorts_are_restored_and_remembered()
+    {
+        var saved = new AppSettings(TableSorts: new Dictionary<string, Synchro.Core.Settings.TableSort>
+        {
+            ["peers"] = new("Address", false),
+            ["files"] = new("Size", true),
+        });
+        _settings.LoadAsync(Arg.Any<CancellationToken>()).Returns(_ => saved);
+        _settings.UpdateAsync(Arg.Any<Func<AppSettings, AppSettings>>(), Arg.Any<CancellationToken>())
+            .Returns(call => saved = call.Arg<Func<AppSettings, AppSettings>>()(saved));
+        _profiles.LoadAsync(Arg.Any<CancellationToken>()).Returns(new[] { _profile });
+        var vm = Create();
+
+        await vm.InitializeCommand.ExecuteAsync(null);
+        Assert.Equal(new Synchro.Core.Settings.TableSort("Address", false), vm.Details.PeerSort);
+        Assert.Equal(new Synchro.Core.Settings.TableSort("Size", true), vm.Details.Files.Sort);
+        Assert.Equal(TrackerItemViewModel.DefaultSort, vm.Details.TrackerSort); // not saved: the default
+
+        vm.Details.SortTrackersCommand.Execute(TrackerItemViewModel.Columns.Seeders);
+        Assert.Equal(new Synchro.Core.Settings.TableSort("Seeders", true), saved.TableSorts!["trackers"]);
+        Assert.Equal(new Synchro.Core.Settings.TableSort("Address", false), saved.TableSorts["peers"]);
+    }
 }

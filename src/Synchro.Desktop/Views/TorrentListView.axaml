@@ -10,43 +10,14 @@
   <!-- The torrents, as a grid: drag a header's edge to resize a column, click a header to sort by it (again: the
        other direction). Sorting is the view model's (TorrentListViewModel.Sort), not the grid's own; selection is
        owned by TorrentListViewModel too. A template column only counts as sortable (and raises Sorting) with a
-       SortMemberPath, so each has one; the grid never uses it, OnSorting handles the click. -->
-  <UserControl.Styles>
-    <!-- Let the header content (SortHeader) choose its own alignment: numbers right, text left. A right-click on a
-         header opens its own menu (column widths) instead of the torrent menu below. -->
-    <Style Selector="DataGridColumnHeader">
-      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-      <Setter Property="ContextMenu">
-        <Template>
-          <ContextMenu>
-            <MenuItem Header="Fit this column" Click="OnFitColumnClick" />
-            <MenuItem Header="Fit all columns" Click="OnFitAllColumnsClick" />
-            <Separator />
-            <MenuItem Header="Reset column widths" Click="OnResetColumnWidthsClick" />
-          </ContextMenu>
-        </Template>
-      </Setter>
-    </Style>
-    <!-- Material's rows are 52 px; the list stays as dense as before (about 33 px), so twice as many torrents fit. -->
-    <Style Selector="DataGrid#TorrentGrid DataGridRow">
-      <Setter Property="MinHeight" Value="33" />
-      <Setter Property="Height" Value="33" />
-    </Style>
-    <Style Selector="DataGrid#TorrentGrid DataGridCell">
-      <Setter Property="MinHeight" Value="0" />
-      <Setter Property="Height" Value="33" />
-    </Style>
-    <Style Selector="DataGridCell TextBlock.number">
-      <Setter Property="HorizontalAlignment" Value="Right" />
-    </Style>
-  </UserControl.Styles>
-
+       SortMemberPath, so each has one; the grid never uses it, GridColumns handles the click. Shared table look:
+       DataGrid.table in AppStyles. -->
   <Panel>
-    <DataGrid x:Name="TorrentGrid" ItemsSource="{Binding TorrentList.VisibleTorrents}"
+    <DataGrid x:Name="TorrentGrid" Classes="table" ItemsSource="{Binding TorrentList.VisibleTorrents}"
               AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended"
               CanUserResizeColumns="True" CanUserSortColumns="True" CanUserReorderColumns="False"
-              GridLinesVisibility="None" HeadersVisibility="Column" Sorting="OnSorting"
-              RowHeight="33" ColumnHeaderHeight="36" BorderThickness="0">
+              GridLinesVisibility="None" HeadersVisibility="Column"
+              RowHeight="33" ColumnHeaderHeight="36">
       <DataGrid.ContextMenu>
         <ContextMenu>
           <MenuItem Header="Start" Command="{Binding Toolbar.StartCommand}" />
@@ -71,7 +42,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Queue}" SortMemberPath="QueueText" Width="52" MinWidth="40">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="#" Column="Queue" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -83,7 +54,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Name}" SortMemberPath="Name" Width="*" MinWidth="160">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Name" Column="Name"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -99,7 +70,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Size}" SortMemberPath="SizeText" Width="84" MinWidth="60">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Size" Column="Size" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -111,7 +82,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Progress}" SortMemberPath="Progress" Width="160" MinWidth="90">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Progress" Column="Progress"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -130,7 +101,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Status}" SortMemberPath="StatusText" Width="140" MinWidth="80">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Status" Column="Status"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -149,7 +120,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Download}" SortMemberPath="DownloadText" Width="96" MinWidth="60">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Down" Column="Download" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -161,7 +132,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Upload}" SortMemberPath="UploadText" Width="96" MinWidth="60">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Up" Column="Upload" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -173,7 +144,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Eta}" SortMemberPath="EtaText" Width="96" MinWidth="56">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="ETA" Column="Eta" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">
@@ -185,7 +156,7 @@
         <DataGridTemplateColumn Tag="{x:Static sort:TorrentSortColumn.Ratio}" SortMemberPath="RatioText" Width="72" MinWidth="56">
           <DataGridTemplateColumn.Header>
             <controls:SortHeader Text="Ratio" Column="Ratio" IsNumeric="True"
-                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.Sort}" />
+                                 Sort="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).TorrentList.HeaderSort}" />
           </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate x:DataType="vm:TorrentItemViewModel">

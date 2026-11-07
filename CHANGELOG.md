@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The Trackers, Peers and Files tabs are tables like the torrent list: click a column header to sort, drag or
+  double-click a header edge to size a column, and right-click a header to fit or reset the widths. Synchromesh
+  remembers each table's sort and widths. Files stays a tree: each folder's contents are sorted, folders first.
+  Peers now start with the fastest download on top. The file list in the Add dialog works the same way.
+
 ## [1.1.0] - 2026-10-31
 
 ### Added

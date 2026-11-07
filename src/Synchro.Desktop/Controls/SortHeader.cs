@@ -8,7 +8,7 @@ using Synchro.Core.Settings;
 namespace Synchro.Desktop.Controls;
 
 /// <summary>
-/// A torrent list column header: its title and, while the list is sorted by this column, an arrow for the direction.
+/// A table's column header: its title and, while the table is sorted by this column, an arrow for the direction.
 /// Numeric columns are right-aligned with the arrow before the title, so the titles line up with the numbers below.
 /// </summary>
 public sealed class SortHeader : StackPanel
@@ -16,11 +16,11 @@ public sealed class SortHeader : StackPanel
     public static readonly StyledProperty<string> TextProperty =
         AvaloniaProperty.Register<SortHeader, string>(nameof(Text), "");
 
-    public static readonly StyledProperty<TorrentSortColumn> ColumnProperty =
-        AvaloniaProperty.Register<SortHeader, TorrentSortColumn>(nameof(Column));
+    public static readonly StyledProperty<string> ColumnProperty =
+        AvaloniaProperty.Register<SortHeader, string>(nameof(Column), "");
 
-    public static readonly StyledProperty<TorrentSort?> SortProperty =
-        AvaloniaProperty.Register<SortHeader, TorrentSort?>(nameof(Sort));
+    public static readonly StyledProperty<TableSort?> SortProperty =
+        AvaloniaProperty.Register<SortHeader, TableSort?>(nameof(Sort));
 
     public static readonly StyledProperty<bool> IsNumericProperty =
         AvaloniaProperty.Register<SortHeader, bool>(nameof(IsNumeric));
@@ -43,14 +43,15 @@ public sealed class SortHeader : StackPanel
         set => SetValue(TextProperty, value);
     }
 
-    public TorrentSortColumn Column
+    /// <summary>The column's key, the same as its <see cref="DataGridColumn.Tag"/>.</summary>
+    public string Column
     {
         get => GetValue(ColumnProperty);
         set => SetValue(ColumnProperty, value);
     }
 
-    /// <summary>The list's current sort, bound from the view model.</summary>
-    public TorrentSort? Sort
+    /// <summary>The table's current sort, bound from the view model.</summary>
+    public TableSort? Sort
     {
         get => GetValue(SortProperty);
         set => SetValue(SortProperty, value);

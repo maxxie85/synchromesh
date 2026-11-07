@@ -4,6 +4,7 @@
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:conv="clr-namespace:Synchro.Desktop.Converters"
              xmlns:views="clr-namespace:Synchro.Desktop.Views"
+             xmlns:controls="clr-namespace:Synchro.Desktop.Controls"
              xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              x:Class="Synchro.Desktop.Views.TorrentDetailsView"
              x:DataType="d:TorrentDetailsViewModel">
@@ -80,7 +81,7 @@
         </ScrollViewer>
       </TabItem>
 
-      <!-- Trackers -->
+      <!-- Trackers: a table like the torrent list (sort, resize, fit; GridColumns in the code-behind). -->
       <TabItem Header="{Binding TrackersHeader}">
         <DockPanel IsVisible="{Binding HasDetails}">
           <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="12,4,12,8">
@@ -91,88 +92,193 @@
               </StackPanel>
             </Button>
           </StackPanel>
-          <Grid DockPanel.Dock="Top" ColumnDefinitions="36,*,220,90,70,70,80,32" ColumnSpacing="12" Margin="16,10,16,6">
-            <TextBlock Classes="header number" Text="Tier" />
-            <TextBlock Grid.Column="1" Classes="header" Text="Address" />
-            <TextBlock Grid.Column="2" Classes="header" Text="Status" />
-            <TextBlock Grid.Column="3" Classes="header number" Text="Next update" />
-            <TextBlock Grid.Column="4" Classes="header number" Text="Seeders" />
-            <TextBlock Grid.Column="5" Classes="header number" Text="Leechers" />
-            <TextBlock Grid.Column="6" Classes="header number" Text="Downloads" />
-          </Grid>
-          <ScrollViewer>
-            <ItemsControl Classes="rows" ItemsSource="{Binding Trackers}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="d:TrackerItemViewModel">
-                  <Grid ColumnDefinitions="36,*,220,90,70,70,80,32" ColumnSpacing="12">
-                    <TextBlock Classes="number secondary" Text="{Binding TierText}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Address}" TextTrimming="CharacterEllipsis"
-                               ToolTip.Tip="{Binding Address}" />
-                    <DockPanel Grid.Column="2" HorizontalSpacing="6">
+          <DataGrid x:Name="TrackerGrid" Classes="table" ItemsSource="{Binding Trackers}" SelectionMode="Single">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Tag="Tier" SortMemberPath="Tier" Width="60" MinWidth="44">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Tier" Column="Tier" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Classes="number secondary" Text="{Binding TierText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Address" SortMemberPath="Address" Width="*" MinWidth="160">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Address" Column="Address"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Text="{Binding Address}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Address}"
+                               VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Status" SortMemberPath="Status" Width="220" MinWidth="100">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Status" Column="Status"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <DockPanel HorizontalSpacing="6" VerticalAlignment="Center">
                       <icons:MaterialIcon Classes="status seeding" Kind="CheckCircleOutline" IsVisible="{Binding IsWorking}" />
                       <icons:MaterialIcon Classes="status error" Kind="AlertCircleOutline" IsVisible="{Binding HasError}" />
                       <TextBlock Text="{Binding StatusText}" TextTrimming="CharacterEllipsis"
                                  ToolTip.Tip="{Binding StatusText}" Classes.error="{Binding HasError}" />
                     </DockPanel>
-                    <TextBlock Grid.Column="3" Classes="number" Text="{Binding NextUpdateText}" />
-                    <TextBlock Grid.Column="4" Classes="number" Text="{Binding SeedersText}" />
-                    <TextBlock Grid.Column="5" Classes="number" Text="{Binding LeechersText}" />
-                    <TextBlock Grid.Column="6" Classes="number" Text="{Binding DownloadsText}" />
-                    <Button Grid.Column="7" Classes="bar small" ToolTip.Tip="Remove this tracker"
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="NextUpdate" SortMemberPath="NextUpdate" Width="110" MinWidth="70">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Next update" Column="NextUpdate" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding NextUpdateText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Seeders" SortMemberPath="Seeders" Width="90" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Seeders" Column="Seeders" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding SeedersText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Leechers" SortMemberPath="Leechers" Width="90" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Leechers" Column="Leechers" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding LeechersText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Downloads" SortMemberPath="Downloads" Width="100" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Downloads" Column="Downloads" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).TrackerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding DownloadsText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Width="48" CanUserResize="False" CanUserSort="False">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:TrackerItemViewModel">
+                    <Button Classes="bar small" ToolTip.Tip="Remove this tracker" HorizontalAlignment="Center"
                             Command="{Binding $parent[UserControl].((d:TorrentDetailsViewModel)DataContext).RemoveTrackerCommand}"
                             CommandParameter="{Binding}">
                       <icons:MaterialIcon Kind="Close" />
                     </Button>
-                  </Grid>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
         </DockPanel>
       </TabItem>
-
-      <!-- Peers -->
+      <!-- Peers: a table like the torrent list; fastest download first by default. -->
       <TabItem Header="{Binding PeersHeader}">
         <Panel IsVisible="{Binding HasDetails}">
-          <DockPanel>
-            <Grid DockPanel.Dock="Top" ColumnDefinitions="20,150,*,80,140,90,90" ColumnSpacing="12" Margin="16,10,16,6">
-              <TextBlock Grid.Column="1" Classes="header" Text="Address" />
-              <TextBlock Grid.Column="2" Classes="header" Text="Client" />
-              <TextBlock Grid.Column="3" Classes="header" Text="Flags" />
-              <TextBlock Grid.Column="4" Classes="header" Text="Has" />
-              <TextBlock Grid.Column="5" Classes="header number" Text="Down" />
-              <TextBlock Grid.Column="6" Classes="header number" Text="Up" />
-            </Grid>
-            <ScrollViewer>
-              <ItemsControl Classes="rows" ItemsSource="{Binding Peers}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
+          <DataGrid x:Name="PeerGrid" Classes="table" ItemsSource="{Binding Peers}" SelectionMode="Single">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Width="40" CanUserResize="False" CanUserSort="False">
+                <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate x:DataType="d:PeerItemViewModel">
-                    <Grid ColumnDefinitions="20,150,*,80,140,90,90" ColumnSpacing="12">
-                      <icons:MaterialIcon Kind="LockOutline" Width="14" Height="14" Opacity="0.6"
-                                          IsVisible="{Binding IsEncrypted}" ToolTip.Tip="Encrypted connection" />
-                      <TextBlock Grid.Column="1" Text="{Binding Address}" TextTrimming="CharacterEllipsis" />
-                      <TextBlock Grid.Column="2" Text="{Binding Client}" TextTrimming="CharacterEllipsis" />
-                      <TextBlock Grid.Column="3" Classes="secondary" Text="{Binding Flags}" FontFamily="Menlo, monospace" FontSize="12"
-                                 VerticalAlignment="Center" />
-                      <Grid Grid.Column="4" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                        <ProgressBar Classes="status downloading" Minimum="0" Maximum="100" Value="{Binding Progress}"
-                                     VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
-                                   MinWidth="34" TextAlignment="Right" VerticalAlignment="Center" />
-                      </Grid>
-                      <TextBlock Grid.Column="5" Classes="number" Text="{Binding DownloadText}" />
-                      <TextBlock Grid.Column="6" Classes="number" Text="{Binding UploadText}" />
+                    <icons:MaterialIcon Kind="LockOutline" Width="14" Height="14" Opacity="0.6" HorizontalAlignment="Center"
+                                        IsVisible="{Binding IsEncrypted}" ToolTip.Tip="Encrypted connection" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Address" SortMemberPath="Address" Width="170" MinWidth="100">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Address" Column="Address"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <TextBlock Text="{Binding Address}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Client" SortMemberPath="Client" Width="*" MinWidth="120">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Client" Column="Client"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <TextBlock Text="{Binding Client}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Flags" SortMemberPath="Flags" Width="90" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Flags" Column="Flags"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <TextBlock Classes="secondary" Text="{Binding Flags}" FontFamily="Menlo, monospace" FontSize="12"
+                               VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Progress" SortMemberPath="Progress" Width="160" MinWidth="90">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Has" Column="Progress"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                      <ProgressBar Classes="status downloading" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                                   VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding ProgressText}" FontSize="12"
+                                 MinWidth="34" TextAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
                   </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </ScrollViewer>
-          </DockPanel>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Download" SortMemberPath="Download" Width="100" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Down" Column="Download" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding DownloadText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Tag="Upload" SortMemberPath="Upload" Width="100" MinWidth="60">
+                <DataGridTemplateColumn.Header>
+                  <controls:SortHeader Text="Up" Column="Upload" IsNumeric="True"
+                                       Sort="{Binding $parent[DataGrid].((d:TorrentDetailsViewModel)DataContext).PeerSort}" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate x:DataType="d:PeerItemViewModel">
+                    <TextBlock Classes="number" Text="{Binding UploadText}" VerticalAlignment="Center" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
           <TextBlock Classes="secondary" Text="No peers connected." HorizontalAlignment="Center" VerticalAlignment="Center"
                      IsVisible="{Binding !Peers.Count}" />
         </Panel>
@@ -180,7 +286,7 @@
       <!-- Files -->
       <TabItem Header="{Binding FilesHeader}">
         <Panel IsVisible="{Binding HasDetails}">
-          <views:FileTreeView DataContext="{Binding Files}" IsVisible="{Binding HasFiles}" />
+          <views:FileTreeView x:Name="FileTree" DataContext="{Binding Files}" IsVisible="{Binding HasFiles}" />
           <TextBlock Classes="secondary" Text="Loading files…" HorizontalAlignment="Center" VerticalAlignment="Center"
                      IsVisible="{Binding !Files.HasFiles}" />
         </Panel>

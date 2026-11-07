@@ -1,5 +1,6 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Synchro.Core.Settings;
 using Synchro.Core.Torrents;
 using Synchro.ViewModels.Formatting;
 
@@ -11,6 +12,45 @@ public sealed partial class TrackerItemViewModel(int id) : ObservableObject
 
     /// <summary>Zero-based tier, as the server numbers them.</summary>
     public int Tier { get; private set; }
+
+    // Raw values for sorting; negative counts and a null time are unknown.
+    internal TimeSpan? NextUpdate { get; private set; }
+    internal int Seeders { get; private set; }
+    internal int Leechers { get; private set; }
+    internal int Downloads { get; private set; }
+
+    /// <summary>Column keys, as the view's columns are tagged.</summary>
+    public static class Columns
+    {
+        public const string Tier = "Tier", Address = "Address", Status = "Status", NextUpdate = "NextUpdate",
+            Seeders = "Seeders", Leechers = "Leechers", Downloads = "Downloads";
+    }
+
+    public static TableSort DefaultSort { get; } = new(Columns.Tier, false);
+
+    public static bool StartsDescending(string column) => column is Columns.Seeders or Columns.Leechers or Columns.Downloads;
+
+    /// <summary>The rows' order for <paramref name="sort"/>; ties by tier, then the server's tracker id.</summary>
+    public static Comparison<TrackerItemViewModel> Order(TableSort sort)
+    {
+        return TableSorting.Comparison<TrackerItemViewModel>(sort,
+        column => column switch
+        {
+            Columns.Tier => (a, b) => a.Tier.CompareTo(b.Tier),
+            Columns.Address => (a, b) => NaturalStringComparer.Instance.Compare(a.Address, b.Address),
+            Columns.Status => (a, b) => string.Compare(a.StatusText, b.StatusText, StringComparison.CurrentCultureIgnoreCase),
+            Columns.NextUpdate => (a, b) => TableSorting.KnownFirst(a.NextUpdate is not null, b.NextUpdate is not null,
+                sort.Descending, () => a.NextUpdate!.Value.CompareTo(b.NextUpdate!.Value)),
+            Columns.Seeders => Count(t => t.Seeders),
+            Columns.Leechers => Count(t => t.Leechers),
+            Columns.Downloads => Count(t => t.Downloads),
+            _ => null,
+        },
+        (a, b) => a.Tier != b.Tier ? a.Tier.CompareTo(b.Tier) : a.Id.CompareTo(b.Id));
+
+        Comparison<TrackerItemViewModel> Count(Func<TrackerItemViewModel, int> value) => (a, b) =>
+            TableSorting.KnownFirst(value(a) >= 0, value(b) >= 0, sort.Descending, () => value(a).CompareTo(value(b)));
+    }
 
     [ObservableProperty] private string _tierText = "";
     [ObservableProperty] private string _address = "";
@@ -30,9 +70,13 @@ public sealed partial class TrackerItemViewModel(int id) : ObservableObject
         StatusText = DescribeStatus(t);
         IsWorking = t.HasAnnounced && t.LastAnnounceSucceeded && t.AnnounceState != TrackerAnnounceState.Active;
         HasError = t.HasAnnounced && !t.LastAnnounceSucceeded && t.AnnounceState != TrackerAnnounceState.Active;
-        NextUpdateText = t.NextAnnounceTime is { } next && next > now && t.AnnounceState != TrackerAnnounceState.Active
-            ? DurationFormatter.FormatEta((long)(next - now).TotalSeconds)
-            : "";
+        NextUpdate = t.NextAnnounceTime is { } next && next > now && t.AnnounceState != TrackerAnnounceState.Active
+            ? next - now
+            : null;
+        NextUpdateText = NextUpdate is { } wait ? DurationFormatter.FormatEta((long)wait.TotalSeconds) : "";
+        Seeders = t.SeederCount;
+        Leechers = t.LeecherCount;
+        Downloads = t.DownloadCount;
         SeedersText = Count(t.SeederCount);
         LeechersText = Count(t.LeecherCount);
         DownloadsText = Count(t.DownloadCount);

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Synchro.AppServices.Torrents;
+using Synchro.Core.Settings;
 using Synchro.Core.Torrents;
 using Synchro.ViewModels.Services;
 
@@ -48,8 +49,45 @@ public sealed partial class TorrentDetailsViewModel : ObservableObject, IDisposa
     }
 
     public GeneralDetailsViewModel General { get; } = new();
-    public ObservableCollection<TrackerItemViewModel> Trackers { get; } = [];
-    public ObservableCollection<PeerItemViewModel> Peers { get; } = [];
+    /// <summary>In <see cref="TrackerSort"/> order; the server's order (tier) by default.</summary>
+    public BulkObservableCollection<TrackerItemViewModel> Trackers { get; } = [];
+
+    /// <summary>In <see cref="PeerSort"/> order; fastest download first by default.</summary>
+    public BulkObservableCollection<PeerItemViewModel> Peers { get; } = [];
+
+    /// <summary>Keys of the tables, for remembering their sorts and column widths.</summary>
+    public static class Tables
+    {
+        public const string Trackers = "trackers", Peers = "peers", Files = "files";
+    }
+
+    /// <summary>The tables' saved column widths (by table, then column), for the view to apply once settings are read.</summary>
+    [ObservableProperty] private IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>>? _columnWidths;
+
+    /// <summary>The Trackers tab's column sort; set from the saved settings at start-up.</summary>
+    [ObservableProperty] private TableSort _trackerSort = TrackerItemViewModel.DefaultSort;
+
+    /// <summary>The Peers tab's column sort; set from the saved settings at start-up.</summary>
+    [ObservableProperty] private TableSort _peerSort = PeerItemViewModel.DefaultSort;
+
+    /// <summary>A click on a Trackers column header (its key): that column, or the other direction.</summary>
+    [RelayCommand]
+    private void SortTrackers(string column) =>
+        TrackerSort = TableSorting.Toggle(TrackerSort, column, TrackerItemViewModel.StartsDescending);
+
+    /// <summary>A click on a Peers column header (its key): that column, or the other direction.</summary>
+    [RelayCommand]
+    private void SortPeers(string column) => PeerSort = TableSorting.Toggle(PeerSort, column, PeerItemViewModel.StartsDescending);
+
+    partial void OnTrackerSortChanged(TableSort value) => Resort(Trackers, TrackerItemViewModel.Order(value));
+    partial void OnPeerSortChanged(TableSort value) => Resort(Peers, PeerItemViewModel.Order(value));
+
+    private static void Resort<T>(BulkObservableCollection<T> rows, Comparison<T> order) where T : class
+    {
+        var target = rows.ToList();
+        target.Sort(order);
+        RowOrder.Apply(rows, target);
+    }
     public FilesViewModel Files { get; }
     public TorrentOptionsViewModel Options { get; }
 
@@ -128,8 +166,10 @@ public sealed partial class TorrentDetailsViewModel : ObservableObject, IDisposa
         General.Apply(details);
         if (details.Options is { } options)
             Options.Load(update.Hash, options);
-        Sync(Trackers, details.Trackers, t => t.Id, t => t.Id, id => new TrackerItemViewModel(id), (vm, t) => vm.Apply(t, now));
-        Sync(Peers, details.Peers, p => p.Key, PeerItemViewModel.KeyOf, key => new PeerItemViewModel(key), (vm, p) => vm.Apply(p));
+        Sync(Trackers, details.Trackers, t => t.Id, t => t.Id, id => new TrackerItemViewModel(id), (vm, t) => vm.Apply(t, now),
+            TrackerItemViewModel.Order(TrackerSort));
+        Sync(Peers, details.Peers, p => p.Key, PeerItemViewModel.KeyOf, key => new PeerItemViewModel(key), (vm, p) => vm.Apply(p),
+            PeerItemViewModel.Order(PeerSort));
         if (details.Files is { } files)
         {
             Files.Apply(update.Hash, files);
@@ -179,7 +219,8 @@ public sealed partial class TorrentDetailsViewModel : ObservableObject, IDisposa
         .Where(t => t != without)
         .GroupBy(t => t.Tier)
         .OrderBy(g => g.Key)
-        .Select(g => (IReadOnlyList<string>)g.Select(t => t.Address).ToList())
+        // The server's order within a tier (by tracker id), whatever the table is sorted by on screen.
+        .Select(g => (IReadOnlyList<string>)g.OrderBy(t => t.Id).Select(t => t.Address).ToList())
         .ToList();
 
     private async Task SetTrackersAsync(string hash, IReadOnlyList<IReadOnlyList<string>> tiers, string failureTitle)
@@ -228,29 +269,26 @@ public sealed partial class TorrentDetailsViewModel : ObservableObject, IDisposa
     }
 
     /// <summary>
-    /// Updates rows in place when the same items come back in the same order (the common case, so the list
-    /// doesn't flicker or lose its scroll position); otherwise rebuilds it, reusing row view models.
+    /// Updates rows in place, reusing row view models by key, and keeps them in the table's sort order: only rows that
+    /// came, went or moved change (see <see cref="RowOrder"/>), so the list doesn't flicker or lose its scroll position.
     /// </summary>
     private static void Sync<TKey, TItem, TModel>(
-        ObservableCollection<TItem> rows, IReadOnlyList<TModel> models,
+        BulkObservableCollection<TItem> rows, IReadOnlyList<TModel> models,
         Func<TItem, TKey> rowKey, Func<TModel, TKey> modelKey,
-        Func<TKey, TItem> create, Action<TItem, TModel> apply) where TKey : notnull
+        Func<TKey, TItem> create, Action<TItem, TModel> apply, Comparison<TItem> order)
+        where TKey : notnull where TItem : class
     {
-        if (rows.Select(rowKey).SequenceEqual(models.Select(modelKey)))
-        {
-            for (var i = 0; i < models.Count; i++)
-                apply(rows[i], models[i]);
-            return;
-        }
-
         var existing = rows.ToDictionary(rowKey);
-        rows.Clear();
+        var target = new List<TItem>(models.Count);
         foreach (var model in models)
         {
             var key = modelKey(model);
             var row = existing.GetValueOrDefault(key) ?? create(key);
             apply(row, model);
-            rows.Add(row);
+            target.Add(row);
         }
+
+        target.Sort(order);
+        RowOrder.Apply(rows, target);
     }
 }

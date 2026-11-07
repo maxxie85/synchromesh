@@ -72,4 +72,21 @@ public sealed class JsonAppSettingsStoreTests : IDisposable
         Assert.Equal(120, loaded[TorrentSortColumn.Size]);
         Assert.Equal(90, loaded[TorrentSortColumn.Eta]);
     }
+
+    [Fact]
+    public async Task Keeps_the_detail_tables_sorts_and_widths()
+    {
+        await new JsonAppSettingsStore(FilePath).UpdateAsync(s => s with
+        {
+            TableSorts = new Dictionary<string, TableSort> { ["peers"] = new("Client", true) },
+            TableColumnWidths = new Dictionary<string, IReadOnlyDictionary<string, double>>
+            {
+                ["files"] = new Dictionary<string, double> { ["Size"] = 110 },
+            },
+        });
+
+        var loaded = await new JsonAppSettingsStore(FilePath).LoadAsync();
+        Assert.Equal(new TableSort("Client", true), loaded.TableSorts!["peers"]);
+        Assert.Equal(110, loaded.TableColumnWidths!["files"]["Size"]);
+    }
 }
